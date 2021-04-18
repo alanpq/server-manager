@@ -1,6 +1,6 @@
 mod ws;
-mod lobby;
-use lobby::Lobby;
+mod server;
+use server::Server;
 mod messages;
 mod start_connection;
 use start_connection::start_connection as start_connection_route;
@@ -11,7 +11,7 @@ use actix_web::{App, HttpServer};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let chat_server = Lobby::default().start(); //create and spin up a lobby
+    let chat_server = Server::default().start(); //create and spin up a lobby
 
     HttpServer::new(move || {
         App::new()

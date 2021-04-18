@@ -1,6 +1,6 @@
 use actix::{fut, ActorContext, WrapFuture, ContextFutureSpawner, ActorFuture};
-use crate::messages::{Disconnect, Connect, WsMessage, ClientActorMessage};
-use crate::lobby::Lobby; 
+use crate::messages::{Disconnect, Connect, WsMessage, ClientCommand};
+use crate::server::Server; 
 use actix::{Actor, Addr, Running, StreamHandler};
 use actix::{AsyncContext, Handler};
 use actix_web_actors::ws;
@@ -14,13 +14,13 @@ const CLIENT_TIMEOUT: Duration = Duration::from_secs(10);
 
 pub struct WsConn {
   room: Uuid,
-  lobby_addr: Addr<Lobby>,
+  lobby_addr: Addr<Server>,
   hb: Instant,
   id: Uuid,
 }
 
 impl WsConn {
-  pub fn new(room: Uuid, lobby: Addr<Lobby>) -> WsConn {
+  pub fn new(room: Uuid, lobby: Addr<Server>) -> WsConn {
     WsConn {
       id: Uuid::new_v4(),
       room,
@@ -94,10 +94,9 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsConn {
         ctx.stop();
       }
       Ok(ws::Message::Nop) => (),
-      Ok(Text(s)) => self.lobby_addr.do_send(ClientActorMessage {
+      Ok(Text(s)) => self.lobby_addr.do_send(ClientCommand {
         id: self.id,
-        msg: s,
-        room_id: self.room
+        cmd: s,
       }),
       
       Err(e) => panic!(e),

@@ -22,8 +22,7 @@ pub struct Disconnect {
 
 #[derive(Message)]
 #[rtype(result = "()")]
-pub struct ClientActorMessage {
+pub struct ClientCommand {
     pub id: Uuid,
-    pub msg: String,
-    pub room_id: Uuid
+    pub cmd: String,
 }
