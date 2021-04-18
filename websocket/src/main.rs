@@ -2,7 +2,7 @@ mod communicator;
 
 mod communicators;
 use communicator::Communicator;
-use communicators::csgo::{self, CSGORcon};
+use communicators::csgo::{CSGORcon};
 
 extern crate rcon;
 
@@ -28,7 +28,7 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream) -> Result<()> {
     info!("New WebSocket connection: {}", peer);
 
     let mut communicator = CSGORcon::new();
-    communicator.connect().await.unwrap();
+    communicator.connect("ein:27015", "bruh").await.unwrap();
     
     while let Some(msg) = ws_stream.next().await {
         let msg = msg?;
