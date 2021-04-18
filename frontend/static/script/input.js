@@ -103,9 +103,3 @@ class Console {
     }
   }
 }
-
-const serverConsole = new Console();
-
-window.onload = () => {
-  serverConsole.init();
-}
