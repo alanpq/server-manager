@@ -92,7 +92,8 @@ class Console {
     const timestamp = document.createElement("h2");
     timestamp.innerText = formatTimestamp(new Date());
     const body = document.createElement("p");
-    body.innerText = content;
+    console.log(content);
+    body.innerHTML = content.replaceAll(" ", "&nbsp;").replaceAll("\n", "<br/>");
   
     line.appendChild(timestamp);
     line.appendChild(body);
