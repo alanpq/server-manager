@@ -4,7 +4,7 @@ const socket = new WebSocket(`ws://${window.location.hostname}:8080`);
 // Connection opened
 socket.addEventListener('open', function (event) {
     serverConsole.addLine("Connected to Websocket.", "meta")
-    serverConsole.oncommand = socket.send;
+    serverConsole.oncommand = (msg) => {socket.send(msg)};
 });
 
 // Listen for messages
