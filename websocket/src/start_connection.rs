@@ -6,19 +6,19 @@ use actix_web_actors::ws;
 use uuid::Uuid;
 
 
-#[get("/{group_id}")]
+// #[get("/{group_id}")]
+#[get("/")]
 pub async fn start_connection(
     req: HttpRequest,
     stream: Payload,
-    Path(group_id): Path<Uuid>,
     srv: Data<Addr<Lobby>>,
 ) -> Result<HttpResponse, Error> {
     let ws = WsConn::new(
-        group_id,
+        Uuid::new_v4(),
         srv.get_ref().clone(),
     );
     println!("incoming req");
 
-    let resp = ws::start(ws, &req, stream)?;
-    Ok(resp)
+    let resp = ws::start(ws, &req, stream);
+    resp
 }
