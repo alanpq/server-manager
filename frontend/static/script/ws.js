@@ -1,12 +1,13 @@
 // Create WebSocket connection.
-const socket = new WebSocket(`ws://${window.location.hostname}:8080/asd`);
+const socket = new WebSocket(`ws://${window.location.hostname}:8080`);
 
 // Connection opened
 socket.addEventListener('open', function (event) {
-    socket.send('Hello Server!');
+    serverConsole.addLine("Connected to Websocket.", "meta")
+    serverConsole.oncommand = socket.send;
 });
 
 // Listen for messages
 socket.addEventListener('message', function (event) {
-    addLine('Message from server ', event.data);
+    serverConsole.addLine(event.data);
 });
