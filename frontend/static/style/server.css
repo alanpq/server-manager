@@ -145,5 +145,11 @@ textarea.console {
 }
 
 .output section.in p{
-  color: var(--fg4);
+  color: var(--fg2);
+}
+.output section.meta p {
+  color: var(--fg3);
+}
+.output section.meta h2 {
+  color: var(--fg3);
 }
