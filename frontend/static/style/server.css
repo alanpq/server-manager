@@ -1,0 +1,149 @@
+main {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  grid-template-rows: auto min-content;
+
+  width: 100%;
+  height: 100%;
+
+  grid-template-areas: 
+    "output stats"
+    "input stats";
+
+  gap: 5px;
+
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.console {
+  position: relative;
+  grid-area: input;
+  font-family: 'Space Mono', monospace;
+  font-variant: no-common-ligatures tabular-nums;
+
+  font-size: 1rem;
+  min-height: 1em;
+  /* height: min-content; */
+  border: 3px solid rgba(255, 255, 255, 0.178);
+
+  padding: 5px;
+
+  background: var(--bg2);
+  color: var(--fg1);
+
+  /* overflow: hidden; */
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+
+.console .content {
+  /* overflow: hidden; */
+  padding: 0;
+  margin: 0;
+  line-height: 1em;
+  height: min-content;
+}
+
+textarea.console {
+  box-sizing: border-box;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+
+  border: none !important;
+  color: transparent;
+  background: transparent;
+
+  margin: 0 0 0 -5px;
+  padding: 5px;
+  
+  /* overflow: hidden; */
+  
+  font-size: 1rem;
+  line-height: 1em;
+  /* min-height: 1em; */
+  /* height: min-content; */
+  overflow: hidden;
+  resize: none;
+}
+
+.console:focus {
+  outline: none;
+  border: 3px solid rgba(255, 255, 255, 0.178);
+}
+
+.caret {
+  opacity: 0;
+  position: absolute;
+  height: 1em;
+  left: 0;
+  top: 0;
+  animation-name: blink;
+  animation-duration: .5s;
+  animation-iteration-count: infinite;
+}
+
+@keyframes blink {
+  0% {
+    opacity: 0;
+  }
+  49% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.caret::after {
+  content: " ";
+  position: absolute;
+  right: -0.48em;
+  top: 33.33%;
+  height: 100%;
+  border-right: 3px solid white;
+}
+
+.stats {
+  grid-area: stats;
+}
+
+.output {
+  grid-area: output;
+  background: var(--bg2);
+  color: var(--fg1);
+  
+  border: 3px solid rgba(255, 255, 255, 0.178);
+
+  font-family: 'Space Mono', monospace;
+  font-variant: no-common-ligatures tabular-nums;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.output section {
+  display: flex;
+}
+
+.output p {
+  margin: 0;
+  margin-left: 1em;
+  padding: 0;
+}
+
+.output h2 {
+  font-size: 1em;
+  color: var(--fg2);
+  margin: 0;
+  padding: 0;
+}
+
+.output section.in p{
+  color: var(--fg4);
+}
