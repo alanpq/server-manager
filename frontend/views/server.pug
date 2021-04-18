@@ -3,20 +3,14 @@ extends partials/base.pug
 block head 
   link(rel="stylesheet", href="style/server.css")
   script(src="script/input.js", defer) 
+  script(src="script/stats.js", defer)
   script(src="script/ws.js", defer)
+  script(src="script/server.js", defer)
 
 block main 
   article.output
-    section
-      h2.timestamp 20:58:01
-      p.content hello world
-    section
-      h2.timestamp 20:58:02
-      p.content hello world
-    section
-      h2.timestamp 20:58:02
-      p.content hello world
   article.stats
+    h1#name
   div.console
     .caret
     .selection
