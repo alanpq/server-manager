@@ -18,8 +18,8 @@ impl CSGORcon {
 
 #[async_trait]
 impl Communicator for CSGORcon {
-  fn name(&self) -> String {
-    return self.name;
+  fn name(&self) -> &String {
+    return &self.name;
   }
 
   fn set_name(&mut self, name: String) {
