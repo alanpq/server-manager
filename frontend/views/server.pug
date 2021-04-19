@@ -18,9 +18,9 @@ block main
     hr
     label(for="rcon_pwd") Password
     input#rcon-pwd(name="rcon_pwd", type="password")
-  div.console
+  div.console.readonly
     .caret
     .selection
     .content
     .dropdown
-    textarea.console(type="text", autocomplete="off")
+    textarea.console(type="text", autocomplete="off", readonly)

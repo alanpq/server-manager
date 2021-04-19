@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital@0;1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400&display=swap');
 
 :root {
   --bg1: rgb(28, 28, 29);
@@ -11,6 +12,9 @@
   --fg2: rgb(224, 219, 206);
   --fg3: rgb(182, 178, 168);
   --fg4: rgb(136, 133, 125);
+
+  --timestamp: rgb(151, 150, 148);
+  --meta: rgb(206, 181, 117);
 }
 
 html, body {
@@ -19,6 +23,8 @@ html, body {
   padding: 0;
 
   color: var(--fg1);
+  font-family: 'IBM Plex Sans', sans-serif;
+  text-rendering: optimizelegibility;
 }
 
 body {

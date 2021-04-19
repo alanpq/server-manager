@@ -59,7 +59,7 @@ class Console {
     this.input.addEventListener("keyup", () => this.updateSelection)
     
     this.input.addEventListener("focus", () => {
-      this.caret.style.visibility = "visible";
+      this.caret.style.visibility = this.input.readOnly ? "hidden" : "visible";
     })
     
     this.input.addEventListener("blur", () => {
@@ -93,7 +93,7 @@ class Console {
     timestamp.innerText = formatTimestamp(new Date());
     const body = document.createElement("p");
     console.log(content);
-    body.innerHTML = content.replaceAll(" ", "&nbsp;").replaceAll("\n", "<br/>");
+    body.innerText = content;
   
     line.appendChild(timestamp);
     line.appendChild(body);

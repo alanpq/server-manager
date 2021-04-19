@@ -3,7 +3,9 @@ const stats = new Stats();
 const conn = new Connection();
 
 conn.onopen = () => {
-  stats.stats.websocket = "DISCONNECTED";
+  stats.stats.websocket = "CONNECTED";
+  serverConsole.input.readOnly = false;
+  serverConsole.outputDiv.className = "console";
   serverConsole.addLine("Connected to Websocket.", "meta");
   serverConsole.oncommand = (msg) => {conn.send(msg)};
   conn.sendCmd({
@@ -14,6 +16,8 @@ conn.onopen = () => {
 
 conn.onclose = () => {
   stats.stats.websocket = "DISCONNECTED";
+  serverConsole.input.readOnly = true;
+  serverConsole.outputDiv.className = "console readonly";
   stats.updateStats();
 }
 
