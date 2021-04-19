@@ -11,6 +11,13 @@ block main
   article.output
   article.stats
     h1#name
+    h2 WebSocket 
+    p#ws-status.DISCONNECTED DISCONNECTED
+    h2 Communicator 
+    p#com-status.DISCONNECTED DISCONNECTED
+    hr
+    label(for="rcon_pwd") Password
+    input#rcon-pwd(name="rcon_pwd", type="password")
   div.console
     .caret
     .selection

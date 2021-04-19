@@ -3,8 +3,17 @@ use serde::{Serialize, Deserialize};
 
 #[derive(Serialize, Deserialize)]
 #[derive(Clone)]
+pub enum CommunicatorStatus {
+  DISCONNECTED,
+  CONNECTING,
+  CONNECTED
+}
+
+#[derive(Serialize, Deserialize)]
+#[derive(Clone)]
 pub struct ServerInfo {
   name: String,
+  communicator: CommunicatorStatus,
 }
 
 pub struct Server {
@@ -17,6 +26,7 @@ impl Server {
     Server {
       info: ServerInfo {
         name,
+        communicator: CommunicatorStatus::DISCONNECTED,
       },
       communicator
     }
@@ -27,7 +37,10 @@ impl Server {
   }
   
   pub async fn connect(&mut self, address: &str, password: &str) -> Result<(), rcon::Error> {
-    self.communicator.connect(address, password).await
+    self.info.communicator = CommunicatorStatus::CONNECTING;
+    self.communicator.connect(address, password).await?;
+    self.info.communicator = CommunicatorStatus::CONNECTED;
+    Ok(())
   }
   
   pub fn info(&self) -> ServerInfo {

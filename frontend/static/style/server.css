@@ -1,7 +1,7 @@
 main {
   display: grid;
   grid-template-columns: 2fr 1fr;
-  grid-template-rows: auto min-content;
+  grid-template-rows: auto 2em;
 
   width: 100%;
   height: 100%;
@@ -10,20 +10,19 @@ main {
     "output stats"
     "input stats";
 
-  gap: 5px;
-
   padding: 10px;
   box-sizing: border-box;
 }
 
 .console {
+  box-sizing: border-box;
   position: relative;
   grid-area: input;
   font-family: 'Space Mono', monospace;
   font-variant: no-common-ligatures tabular-nums;
 
   font-size: 1rem;
-  min-height: 1em;
+  height: 2em;
   /* height: min-content; */
   border: 3px solid rgba(255, 255, 255, 0.178);
 
@@ -39,7 +38,6 @@ main {
 
 .console .content {
   /* overflow: hidden; */
-  padding: 0;
   margin: 0;
   line-height: 1em;
   height: min-content;
@@ -106,11 +104,67 @@ textarea.console {
   right: -0.48em;
   top: 33.33%;
   height: 100%;
-  border-right: 3px solid white;
+  border-right: 2px solid white;
 }
 
 .stats {
+  font-family: sans-serif;
   grid-area: stats;
+
+  padding: 0 15px;
+
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  grid-template-rows: min-content auto;
+  height: min-content;
+  gap: 0 1em;
+}
+
+.stats h1 {
+  grid-column: 1/3;
+}
+
+h1,h2,h3,h4,h5,h6 {
+  margin: 0;
+  padding: 0;
+  color: var(--fg2);
+}
+
+.stats h1{
+  font-size: 2em;
+  margin-bottom: 0.25em;
+}
+
+.stats h2, .stats label {
+  font-size: 1em;
+  color: var(--fg3);
+  text-align: right;
+  font-weight: bold;
+  color: var(--fg3);
+}
+
+.stats p {
+  margin: 0;
+  font-size: 0.9em;
+  text-transform: lowercase;
+}
+
+.DISCONNECTED {
+  color: red;
+}
+
+.CONNECTING {
+  color: orange;
+}
+
+.CONNECTED {
+  color: green;
+}
+
+.stats hr {
+  grid-column: 1/3;
+  width: 90%;
+  box-sizing: border-box;
 }
 
 .output {
@@ -118,13 +172,19 @@ textarea.console {
   background: var(--bg2);
   color: var(--fg1);
   
+  padding: 0 5px;
   border: 3px solid rgba(255, 255, 255, 0.178);
+  border-bottom: none;
 
   font-family: 'Space Mono', monospace;
   font-variant: no-common-ligatures tabular-nums;
 
   display: flex;
   flex-direction: column;
+
+  overflow: auto;
+
+  height: 100%;
 }
 
 .output section {

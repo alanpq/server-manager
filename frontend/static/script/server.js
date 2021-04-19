@@ -3,11 +3,18 @@ const stats = new Stats();
 const conn = new Connection();
 
 conn.onopen = () => {
+  stats.stats.websocket = "DISCONNECTED";
   serverConsole.addLine("Connected to Websocket.", "meta");
   serverConsole.oncommand = (msg) => {conn.send(msg)};
   conn.sendCmd({
     type: "stats"
   });
+  stats.updateStats();
+}
+
+conn.onclose = () => {
+  stats.stats.websocket = "DISCONNECTED";
+  stats.updateStats();
 }
 
 conn.ontext = (txt) => {
@@ -22,7 +29,7 @@ conn.oncmd = (cmd) => {
     break;
 
     case "Status":
-      stats.stats = cmd.body;
+      Object.assign(stats.stats, cmd.body);
       stats.updateStats();
     break;
 
@@ -36,5 +43,7 @@ conn.oncmd = (cmd) => {
 
 window.onload = () => {
   serverConsole.init();
+  stats.stats.websocket = "CONNECTING";
   conn.init();
+  stats.updateStats();
 }
