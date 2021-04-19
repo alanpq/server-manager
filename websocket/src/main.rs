@@ -1,10 +1,19 @@
 mod communicator;
 
 mod communicators;
+use commands::Command;
 use communicator::Communicator;
 use communicators::csgo::{CSGORcon};
 
+mod commands;
+mod server;
+
 extern crate rcon;
+extern crate base64;
+
+use base64::{encode, decode};
+
+use std::str;
 
 use futures_util::{SinkExt, StreamExt};
 use log::*;
@@ -12,6 +21,7 @@ use std::net::SocketAddr;
 use tokio::net::{TcpListener, TcpStream};
 use tokio_tungstenite::{accept_async, tungstenite::Error};
 use tungstenite::{Result, Message};
+use serde_json::Value;
 
 async fn accept_connection(peer: SocketAddr, stream: TcpStream) {
     if let Err(e) = handle_connection(peer, stream).await {
@@ -20,6 +30,10 @@ async fn accept_connection(peer: SocketAddr, stream: TcpStream) {
             err => error!("Error processing connection: {}", err),
         }
     }
+}
+
+fn encode_cmd(cmd: &Command) -> Vec<u8> {
+    Vec::from(encode(serde_json::to_string(cmd).unwrap()).as_bytes())
 }
 
 async fn handle_connection(peer: SocketAddr, stream: TcpStream) -> Result<()> {
@@ -37,6 +51,34 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream) -> Result<()> {
                 let res = communicator.send_cmd(msg.to_string()).await;
                 ws_stream.send(Message::from(res)).await?;
             },
+            Message::Binary(bin) => {
+                // bin.into_iter().map(|b| {
+                //     println!("{}",b);
+                //     b
+                // });
+
+                let json = str::from_utf8(&bin).unwrap();
+                let json = decode(json).unwrap();
+                let json = str::from_utf8(&json).unwrap();
+                let json: Value = serde_json::from_str(json).unwrap();
+                match &json["type"] {
+                    Value::String(str) => {
+                        match str.as_str() {
+                            "stats" => {
+                                ws_stream.send(Message::from(encode_cmd(
+                                    &Command::Print("todo: this :)".to_string())
+                                ))).await?;
+                            },
+                            _ => {
+                                ws_stream.send(Message::from(encode_cmd(
+                                    &Command::Print("Unknown command".to_string())
+                                ))).await?;
+                            },
+                        }
+                    },
+                    _ => {}
+                }
+            }
             _ => {
                 ws_stream.send(msg).await?;
             }
