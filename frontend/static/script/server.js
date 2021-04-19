@@ -16,6 +16,16 @@ conn.ontext = (txt) => {
 
 conn.oncmd = (cmd) => {
   console.log(cmd);
+  switch(cmd.type) {
+    case "Print":
+      serverConsole.addLine(cmd.body, "meta");
+    break;
+
+    default:
+      console.error("unexpected command received:")
+      console.error(cmd);
+    break;
+  }
   stats.updateStats();
 }
 
