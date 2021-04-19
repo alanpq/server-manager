@@ -12,6 +12,7 @@ extern crate rcon;
 extern crate base64;
 
 use base64::{encode, decode};
+use server::Server;
 
 use std::str;
 
@@ -41,14 +42,15 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream) -> Result<()> {
 
     info!("New WebSocket connection: {}", peer);
 
-    let mut communicator = CSGORcon::new();
-    communicator.connect("ein:27015", "bruh").await.unwrap();
+    // TODO: one server, multiple ws connections
+    let mut server = Server::new("ein csgo server".to_string(), Box::new(CSGORcon::new()));
+    server.connect("ein:27015", "bruh").await.unwrap();
     
     while let Some(msg) = ws_stream.next().await {
         let msg = msg?;
         match msg {
             Message::Text(msg) => {
-                let res = communicator.send_cmd(msg.to_string()).await;
+                let res = server.send_cmd(msg.to_string()).await;
                 ws_stream.send(Message::from(res)).await?;
             },
             Message::Binary(bin) => {
@@ -65,8 +67,9 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream) -> Result<()> {
                     Value::String(str) => {
                         match str.as_str() {
                             "stats" => {
+                                let info = server.info();
                                 ws_stream.send(Message::from(encode_cmd(
-                                    &Command::Print("todo: this :)".to_string())
+                                    &Command::Status(info)
                                 ))).await?;
                             },
                             _ => {
@@ -80,7 +83,7 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream) -> Result<()> {
                 }
             }
             _ => {
-                ws_stream.send(msg).await?;
+                ws_stream.send(msg.clone()).await?;
             }
         }
 
