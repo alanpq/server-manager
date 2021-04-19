@@ -8,7 +8,7 @@ class Connection {
     }
 
     init() {
-        this.socket = new WebSocket(`ws://${window.location.hostname}:8080`);
+        this.socket = new WebSocket(`ws://${window.location.hostname}:18249`);
         this.socket.addEventListener('open', this.onopen);
         this.socket.addEventListener('close', this.onclose);
         this.socket.addEventListener('error', this.onerror);

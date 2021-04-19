@@ -18,6 +18,7 @@ class Console {
     this.output = document.querySelector("div.console .content");
     this.dropdown = document.querySelector("div.console .dropdown");
 
+    this.mouseDown = false;
     this.oncommand = () => {}; // made to be overwritten by websocket events
 
     this.addEventListeners();
@@ -56,8 +57,22 @@ class Console {
         e.preventDefault();
       }
     }, true)
-    this.input.addEventListener("keyup", () => this.updateSelection)
-    
+    this.input.addEventListener("keyup", ()=>{this.updateSelection()})
+
+    this.input.addEventListener("mousedown", () => {this.mouseDown = true;})
+    this.input.addEventListener("mouseup", () => {
+      this.mouseDown = false;
+      
+      this.caret.style.visibility = this.input.readOnly ? "hidden" : "visible";
+      this.updateSelection();
+    })
+
+    this.input.addEventListener("mousemove", () => {
+      if(this.mouseDown) {
+        this.caret.style.visibility = "hidden";
+      }
+    })
+
     this.input.addEventListener("focus", () => {
       this.caret.style.visibility = this.input.readOnly ? "hidden" : "visible";
     })
@@ -76,7 +91,7 @@ class Console {
       this.caret.style.left = `${(start%maxChars)*this.charW}px`;
       this.caret.style.top = `${Math.floor(start/maxChars)}em`;
     } else {
-  
+      this.caret.style.visibility = "hidden";
     }
   }
 
@@ -85,12 +100,15 @@ class Console {
     - clone element instead of creating scratch
     - dont push immediately to dom tree
   */
-  addLine(content="", className="out") {
+  addLine(content="", className="out", color="transparent") {
     if(!this.initialized) return; // maybe add undisplayable messages to a queue of sorts
     const line = document.createElement("section");
     line.className = className;
+    line.style.backgroundColor = color;
     const timestamp = document.createElement("h2");
-    timestamp.innerText = formatTimestamp(new Date());
+    const now = new Date();
+    timestamp.innerText = formatTimestamp(now);
+    timestamp.title = now.toTimeString();
     const body = document.createElement("p");
     console.log(content);
     body.innerText = content;
@@ -98,8 +116,11 @@ class Console {
     line.appendChild(timestamp);
     line.appendChild(body);
     this.log.appendChild(line);
+    
     if(className == "in") {
       this.oncommand(content);
     }
+    
+    this.log.scrollBy(0,10000);
   }
 }

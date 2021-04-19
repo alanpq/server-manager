@@ -1,5 +1,6 @@
-use crate::communicator::Communicator;
+use crate::{communicator::Communicator, state::State};
 use serde::{Serialize, Deserialize};
+use serde_json::Value;
 
 #[derive(Serialize, Deserialize)]
 #[derive(Clone)]
@@ -12,8 +13,9 @@ pub enum CommunicatorStatus {
 #[derive(Serialize, Deserialize)]
 #[derive(Clone)]
 pub struct ServerInfo {
-  name: String,
-  communicator: CommunicatorStatus,
+  pub name: String,
+  pub communicator: CommunicatorStatus,
+  pub clients: Value,
 }
 
 pub struct Server {
@@ -27,6 +29,7 @@ impl Server {
       info: ServerInfo {
         name,
         communicator: CommunicatorStatus::DISCONNECTED,
+        clients: Value::Null,
       },
       communicator
     }

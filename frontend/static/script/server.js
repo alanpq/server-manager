@@ -2,6 +2,10 @@ const serverConsole = new Console();
 const stats = new Stats();
 const conn = new Connection();
 
+const getColor = (hue) => {
+  return `hsla(${(hue/255)*360}, 100%, 60%, 0.3)`
+}
+
 conn.onopen = () => {
   stats.stats.websocket = "CONNECTED";
   serverConsole.input.readOnly = false;
@@ -22,7 +26,7 @@ conn.onclose = () => {
 }
 
 conn.ontext = (txt) => {
-  serverConsole.addLine(txt);
+  serverConsole.addLine(txt, "out", getColor(stats.self.hue));
 }
 
 conn.oncmd = (cmd) => {
@@ -34,6 +38,11 @@ conn.oncmd = (cmd) => {
 
     case "Status":
       Object.assign(stats.stats, cmd.body);
+      stats.updateStats();
+    break;
+
+    case "Identity":
+      stats.self = cmd.body;
       stats.updateStats();
     break;
 
