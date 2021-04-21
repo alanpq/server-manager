@@ -6,11 +6,30 @@ const getColor = (hue) => {
   return `hsla(${(hue/255)*360}, 100%, 60%, 0.3)`
 }
 
+const socketStates = [
+  "CONNECTING",
+  "CONNECTED",
+  "DISCONNECTED",
+  "DISCONNECTED"
+];
+const updateSocketStatus = () => {
+  if(!conn.socket) {
+    stats.stats.websocket = "CONNECTING";
+    return;
+  }
+  stats.stats.websocket = socketStates[conn.socket.readyState];
+}
+
 conn.onopen = () => {
-  stats.stats.websocket = "CONNECTED";
+  // stats.stats.websocket = "CONNECTED";
   serverConsole.input.readOnly = false;
   serverConsole.outputDiv.className = "console";
-  serverConsole.addLine("Connected to Websocket.", "meta");
+  setTimeout(() => {
+    updateSocketStatus();
+    stats.updateStats();
+    if(conn.socket.readyState == 1)
+      serverConsole.addLine("Connected to Websocket.", "meta");
+  }, 500);
   serverConsole.oncommand = (msg) => {
     serverConsole.addLine(msg, "in", getColor(stats.self.hue));
     conn.send(msg)
@@ -22,7 +41,12 @@ conn.onopen = () => {
 }
 
 conn.onclose = () => {
-  stats.stats.websocket = "DISCONNECTED";
+  const s = stats.stats.websocket;
+  updateSocketStatus();
+  if(s == "CONNECTED")
+    serverConsole.addLine("Websocket connection closed.", "meta");
+  else
+    serverConsole.addLine("Could not connect to Websocket.", "meta");
   serverConsole.input.readOnly = true;
   serverConsole.outputDiv.className = "console readonly";
   stats.updateStats();
@@ -65,7 +89,8 @@ conn.oncmd = (cmd) => {
 
 window.onload = () => {
   serverConsole.init();
-  stats.stats.websocket = "CONNECTING";
+  updateSocketStatus();
+  // stats.stats.websocket = "CONNECTING";
   conn.init();
   stats.updateStats();
 }
