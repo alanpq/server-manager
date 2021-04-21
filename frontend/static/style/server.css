@@ -177,28 +177,34 @@ h1,h2,h3,h4,h5,h6 {
   background: var(--bg2);
   color: var(--fg1);
   
-  padding: 0 5px;
+  /* padding: 0 5px; */
 
   font-family: 'Roboto Mono', monospace;
   font-variant: no-common-ligatures tabular-nums;
 
   display: flex;
+  align-items: stretch;
   flex-direction: column;
 
   overflow: auto;
 
   height: 100%;
+  min-width: 100%;
+  width: 100%;
 
   white-space: pre;
 }
 
 .output section {
   display: flex;
+  padding: 0 0 0 5px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .output p { /* output line */
+  box-sizing: border-box;
   margin: 0;
-  margin-left: .7em;
   padding: 0;
 }
 
@@ -206,6 +212,7 @@ h1,h2,h3,h4,h5,h6 {
   font-size: 1em;
   color: var(--timestamp);
   margin: 0;
+  margin-right: .7em;
   padding: 0;
   font-weight: normal;
 }

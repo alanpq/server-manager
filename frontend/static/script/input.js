@@ -50,7 +50,7 @@ class Console {
     })
     this.input.addEventListener("keydown", (e) => {
       if(e.keyCode == 13) {// enter
-        this.addLine(this.input.value, "in");
+        this.oncommand(this.input.value);
         this.input.value = "";
         this.output.innerHTML = "";
         this.updateSelection();
@@ -116,10 +116,6 @@ class Console {
     line.appendChild(timestamp);
     line.appendChild(body);
     this.log.appendChild(line);
-    
-    if(className == "in") {
-      this.oncommand(content);
-    }
     
     this.log.scrollBy(0,10000);
   }

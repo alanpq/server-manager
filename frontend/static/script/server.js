@@ -11,7 +11,10 @@ conn.onopen = () => {
   serverConsole.input.readOnly = false;
   serverConsole.outputDiv.className = "console";
   serverConsole.addLine("Connected to Websocket.", "meta");
-  serverConsole.oncommand = (msg) => {conn.send(msg)};
+  serverConsole.oncommand = (msg) => {
+    serverConsole.addLine(msg, "in", getColor(stats.self.hue));
+    conn.send(msg)
+  };
   conn.sendCmd({
     type: "stats"
   });
@@ -44,6 +47,12 @@ conn.oncmd = (cmd) => {
     case "Identity":
       stats.self = cmd.body;
       stats.updateStats();
+    break;
+
+    case "ForeignCommand":
+      const c = getColor(stats.stats.clients[cmd.body.id].hue);
+      serverConsole.addLine(cmd.body.cmd, "in", c);
+      serverConsole.addLine(cmd.body.out, "out", c);
     break;
 
     default:

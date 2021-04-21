@@ -66,6 +66,7 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLoc
     };
     // let mut state_w = ;
     state.write().await.clients.insert(client.uuid, client.clone());
+    state.read().await.count.fetch_add(1, Ordering::Relaxed);
 
     // TODO: one server, multiple ws connections
     let mut server = Server::new("ein csgo server".to_string(), Box::new(CSGORcon::new()));
@@ -75,7 +76,17 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLoc
         &Command::Identity(client.clone())
     ))).await?;
 
-    state.read().await.count.fetch_add(1, Ordering::Relaxed);
+    let mut info = server.info();
+    info.clients = serde_json::to_value(&state.read().await.clients).unwrap();
+    for other in state.read().await.clients.values() {
+        if other.uuid == client.uuid {
+            continue;
+        }
+        
+        other.sender.unbounded_send(Message::from(encode_cmd(
+            &Command::Status(info.clone())
+        ))).unwrap();
+    }
 
     let server_cell = Arc::new(Mutex::new(server));
     let state_cell = Arc::new(Mutex::new(state));
@@ -87,13 +98,15 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLoc
         let tx_lock = tx_cell.lock().await;
         match msg {
             Message::Text(msg) => {
-                let res = server_lock.send_cmd(msg.to_string()).await;
+                let msg = msg.to_string();
+                let res = server_lock.send_cmd(msg.clone()).await;
                 for other in state_lock.read().await.clients.values() {
                     if other.uuid == client.uuid {
                         continue;
                     }
                     other.sender.unbounded_send(Message::from(encode_cmd(&Command::ForeignCommand{
-                        cmd: msg.to_string(),
+                        id: client.uuid,
+                        cmd: msg.clone(),
                         out: res.clone()
                     }))).unwrap();
                     
@@ -145,7 +158,13 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLoc
     // future::select(broadcast_incoming, receive_from_others).await;
 
     println!("{} disconnected", &peer);
-    // state.write().await.clients.remove(&client.uuid);
+    state_cell.lock().await.write().await.clients.remove(&client.uuid);
+
+    for other in state_cell.lock().await.read().await.clients.values() {        
+        other.sender.unbounded_send(Message::from(encode_cmd(
+            &Command::Status(info.clone())
+        ))).unwrap();
+    }
 
     Ok(())
 }

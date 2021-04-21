@@ -4,11 +4,13 @@ class Stats {
       name: document.getElementById("name"),
       websocket: document.getElementById("ws-status"),
       communicator: document.getElementById("com-status"),
+      clients: document.getElementById("clients"),
     }
     this.stats = {
       name: "Server",
       communicator: "DISCONNECTED",
       websocket: "DISCONNECTED",
+      clients: {},
     }
   }
 
@@ -17,5 +19,9 @@ class Stats {
 
     this.dom.communicator.innerText = this.dom.communicator.className = this.stats.communicator;
     this.dom.websocket.innerText = this.dom.websocket.className = this.stats.websocket;
+
+    this.dom.clients.innerHTML = Object.values(this.stats.clients).reduce((acc, current) => {
+      return `${acc}<li>${current.name}</li>`;
+    }, "");
   }
 }
