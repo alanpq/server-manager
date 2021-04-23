@@ -1,4 +1,4 @@
-use crate::{communicator::Communicator, state::State};
+use crate::{communicator::{self, Communicator}, state::State};
 use serde::{Serialize, Deserialize};
 use serde_json::Value;
 
@@ -20,11 +20,11 @@ pub struct ServerInfo {
 
 pub struct Server {
   info: ServerInfo,
-  communicator: Box<dyn Communicator + Send>
+  communicator: Box<dyn Communicator + Send + Sync>
 }
 
 impl Server {
-  pub fn new(name: String, communicator: Box<dyn Communicator + Send>) -> Server {
+  pub fn new(name: String, communicator: Box<dyn Communicator + Send + Sync>) -> Server {
     Server {
       info: ServerInfo {
         name,
@@ -46,7 +46,7 @@ impl Server {
       self.info.communicator = CommunicatorStatus::DISCONNECTED;
       return Err(communicator::Error::ConnectionError);
     } else {
-    self.info.communicator = CommunicatorStatus::CONNECTED;
+      self.info.communicator = CommunicatorStatus::CONNECTED;
     }
     Ok(())
   }

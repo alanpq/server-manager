@@ -4,6 +4,8 @@ use tungstenite::Message;
 use uuid::Uuid;
 use serde::{Serialize, Deserialize};
 use futures_channel::mpsc::{unbounded, UnboundedSender};
+
+use crate::server::Server;
 #[derive(Serialize)]
 #[derive(Clone)]
 pub struct Client {
@@ -18,6 +20,7 @@ pub struct Client {
 pub struct State {
   pub count: AtomicU32,
   pub clients: HashMap<Uuid, Client>,
+  pub servers: HashMap<Uuid, Server>,
 }
 
 impl State {
@@ -25,6 +28,7 @@ impl State {
     State {
       count: AtomicU32::new(0),
       clients: HashMap::new(),
+      servers: HashMap::new(),
     }
   }
 }
