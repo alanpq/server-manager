@@ -39,10 +39,15 @@ impl Server {
     self.communicator.send_cmd(cmd).await
   }
   
-  pub async fn connect(&mut self, address: &str, password: &str) -> Result<(), rcon::Error> {
+  pub async fn connect(&mut self, address: &str, password: &str) -> Result<(), communicator::Error> {
     self.info.communicator = CommunicatorStatus::CONNECTING;
-    self.communicator.connect(address, password).await?;
+    let res = self.communicator.connect(address, password).await;
+    if res.is_err() {
+      self.info.communicator = CommunicatorStatus::DISCONNECTED;
+      return Err(communicator::Error::ConnectionError);
+    } else {
     self.info.communicator = CommunicatorStatus::CONNECTED;
+    }
     Ok(())
   }
   

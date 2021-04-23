@@ -1,8 +1,7 @@
 mod communicator;
 
 mod communicators;
-use commands::Command;
-use communicator::Communicator;
+use commands::ServerCommand;
 use communicators::csgo::{CSGORcon};
 
 mod commands;
@@ -18,7 +17,6 @@ use state::{Client, State};
 
 use std::str;
 use std::sync::{Arc};
-use std::cell::RefCell;
 use std::sync::atomic::{Ordering};
 
 use rand::random;
@@ -48,7 +46,7 @@ fn encode_cmd(cmd: &Command) -> Vec<u8> {
 }
 
 async fn handle_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLock<State>>) -> Result<()> {
-    let mut ws_stream = accept_async(stream).await.expect("Failed to accept");
+    let ws_stream = accept_async(stream).await.expect("Failed to accept");
 
     info!("New WebSocket connection: {}", peer);
 
@@ -56,7 +54,7 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLoc
     // to the websocket...
     let (tx, rx) = unbounded();
 
-    let (mut outgoing, mut incoming) = ws_stream.split();
+    let (mut outgoing, incoming) = ws_stream.split();
 
     let client = Client {
         uuid: uuid::Uuid::new_v4(),
@@ -70,7 +68,7 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLoc
 
     // TODO: one server, multiple ws connections
     let mut server = Server::new("ein csgo server".to_string(), Box::new(CSGORcon::new()));
-    server.connect("ein:27015", "bruh").await.unwrap();
+    server.connect("ein:27015", "bruh").await.ok();
 
     outgoing.send(Message::from(encode_cmd(
         &Command::Identity(client.clone())
