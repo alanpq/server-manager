@@ -10,6 +10,8 @@ pub enum ServerCommand {
   Print(String),
   ForeignCommand{id: Uuid, cmd: String, out: String},
   Identity(Client),
+
+  ServerList(Vec<ServerInfo>)
 }
 
 #[derive(Debug)]

@@ -89,7 +89,8 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLoc
     let server_cell = Arc::new(Mutex::new(server));
     let state_cell = Arc::new(Mutex::new(state));
     let tx_cell = Arc::new(Mutex::new(tx.clone()));
-
+    
+    // TODO: auth
     let process_incoming = incoming.try_for_each(|msg| async {
         let mut server_lock = server_cell.lock().await;
         let state_lock = state_cell.lock().await;
@@ -137,10 +138,15 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLoc
                                 state_lock.write().await.servers.insert(server.id().clone(), server);
                             },
                             ClientCommand::ListServers() => {
-
+                                let state = state_lock.read().await;
+                                tx_lock.unbounded_send(Message::from(encode_cmd(
+                                    &ServerCommand::ServerList(state.servers.values().map(|srv| {
+                                        srv.info()
+                                    }).collect())
+                                ))).unwrap();
                             },
                             ClientCommand::RemoveServer(id) => {
-
+                                state_lock.write().await.servers.remove(&id);
                             }
                         }
                     },
