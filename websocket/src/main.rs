@@ -1,7 +1,7 @@
 mod communicator;
 
 mod communicators;
-use commands::ServerCommand;
+use commands::{ClientCommand, ServerCommand};
 use communicators::csgo::{CSGORcon};
 
 mod commands;
@@ -41,7 +41,7 @@ async fn accept_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLoc
     }
 }
 
-fn encode_cmd(cmd: &Command) -> Vec<u8> {
+fn encode_cmd(cmd: &ServerCommand) -> Vec<u8> {
     Vec::from(encode(serde_json::to_string(cmd).unwrap()).as_bytes())
 }
 
@@ -71,7 +71,7 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLoc
     server.connect("ein:27015", "bruh").await.ok();
 
     outgoing.send(Message::from(encode_cmd(
-        &Command::Identity(client.clone())
+        &ServerCommand::Identity(client.clone())
     ))).await?;
 
     let mut info = server.info();
@@ -82,7 +82,7 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLoc
         }
         
         other.sender.unbounded_send(Message::from(encode_cmd(
-            &Command::Status(info.clone())
+            &ServerCommand::Status(info.clone())
         ))).unwrap();
     }
 
@@ -102,7 +102,7 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLoc
                     if other.uuid == client.uuid {
                         continue;
                     }
-                    other.sender.unbounded_send(Message::from(encode_cmd(&Command::ForeignCommand{
+                    other.sender.unbounded_send(Message::from(encode_cmd(&ServerCommand::ForeignCommand{
                         id: client.uuid,
                         cmd: msg.clone(),
                         out: res.clone()
@@ -120,25 +120,35 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLoc
                 let json = str::from_utf8(&bin).unwrap();
                 let json = decode(json).unwrap();
                 let json = str::from_utf8(&json).unwrap();
-                let json: Value = serde_json::from_str(json).unwrap();
-                match &json["type"] {
-                    Value::String(str) => {
-                        match str.as_str() {
-                            "stats" => {
+                // let json: Value = serde_json::from_str(json).unwrap();
+                let json = serde_json::from_str::<ClientCommand>(json);
+                match json {
+                    Ok(cmd) => {
+                        match cmd {
+                            ClientCommand::Status() => {
                                 let mut info = server_lock.info();
                                 info.clients = serde_json::to_value(&state_lock.read().await.clients).unwrap();
                                 tx_lock.unbounded_send(Message::from(encode_cmd(
-                                    &Command::Status(info)
+                                    &ServerCommand::Status(info)
                                 ))).unwrap();
                             },
-                            _ => {
-                                tx_lock.unbounded_send(Message::from(encode_cmd(
-                                    &Command::Print("Unknown command".to_string())
-                                ))).unwrap();
+                            ClientCommand::CreateServer{name, server} => {
+                                let server = Server::create(name, server);
+                                state_lock.write().await.servers.insert(server.id().clone(), server);
                             },
+                            ClientCommand::ListServers() => {
+
+                            },
+                            ClientCommand::RemoveServer(id) => {
+
+                            }
                         }
                     },
-                    _ => {}
+                    Err(_) => {
+                        tx_lock.unbounded_send(Message::from(encode_cmd(
+                            &ServerCommand::Print("Unknown command".to_string())
+                        ))).unwrap();
+                    }
                 }
             }
             _ => {
@@ -155,12 +165,12 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLoc
     future::select(process_incoming, receive_from_others).await;
     // future::select(broadcast_incoming, receive_from_others).await;
 
-    println!("{} disconnected", &peer);
+    info!("{} disconnected", &peer);
     state_cell.lock().await.write().await.clients.remove(&client.uuid);
 
     for other in state_cell.lock().await.read().await.clients.values() {        
         other.sender.unbounded_send(Message::from(encode_cmd(
-            &Command::Status(info.clone())
+            &ServerCommand::Status(info.clone())
         ))).unwrap();
     }
 

@@ -1,7 +1,9 @@
-use crate::{communicator::{self, Communicator}, state::State};
+use crate::{communicator::{self, Communicator}, communicators::{CommunicatorType, csgo::CSGORcon}, state::State};
 use serde::{Serialize, Deserialize};
 use serde_json::Value;
+use uuid::Uuid;
 
+#[derive(Debug)]
 #[derive(Serialize, Deserialize)]
 #[derive(Clone)]
 pub enum CommunicatorStatus {
@@ -10,6 +12,7 @@ pub enum CommunicatorStatus {
   CONNECTED
 }
 
+#[derive(Debug)]
 #[derive(Serialize, Deserialize)]
 #[derive(Clone)]
 pub struct ServerInfo {
@@ -19,6 +22,7 @@ pub struct ServerInfo {
 }
 
 pub struct Server {
+  id: Uuid,
   info: ServerInfo,
   communicator: Box<dyn Communicator + Send + Sync>
 }
@@ -26,6 +30,7 @@ pub struct Server {
 impl Server {
   pub fn new(name: String, communicator: Box<dyn Communicator + Send + Sync>) -> Server {
     Server {
+      id: Uuid::new_v4(),
       info: ServerInfo {
         name,
         communicator: CommunicatorStatus::DISCONNECTED,
@@ -34,6 +39,20 @@ impl Server {
       communicator
     }
   }
+  // TODO: better server creation infra
+  // im 90% sure theres a way to delegate the creation code to the communicators themselves
+  // that way the footprint of a new communicator is ideally only in 1 file
+  pub fn create(name: String, communicator: CommunicatorType) -> Server {
+    match communicator {
+      CommunicatorType::CSGO => {
+        Server::new(name, Box::new(CSGORcon::new()))
+      },
+    }
+  }
+
+  pub fn id(&self) -> &Uuid {
+    return &self.id;
+  } 
 
   pub async fn send_cmd(&mut self, cmd: String) -> String {
     self.communicator.send_cmd(cmd).await

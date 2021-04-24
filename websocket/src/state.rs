@@ -6,6 +6,7 @@ use serde::{Serialize, Deserialize};
 use futures_channel::mpsc::{unbounded, UnboundedSender};
 
 use crate::server::Server;
+#[derive(Debug)]
 #[derive(Serialize)]
 #[derive(Clone)]
 pub struct Client {
