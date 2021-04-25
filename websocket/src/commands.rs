@@ -18,9 +18,11 @@ pub enum ServerCommand {
 #[derive(Deserialize)]
 #[serde(tag = "type", content = "body")]
 pub enum ClientCommand {
-  Status,
+  Command{id: Uuid, cmd: String},
+  Status(Option<Uuid>), // get status of server
 
-  CreateServer{name: String, server: CommunicatorType},
+  CreateServer,
+  UpdateServer{id: Uuid, name: Option<String>, communicatorType: Option<CommunicatorType>},
   RemoveServer(Uuid),
   ListServers,
 }
