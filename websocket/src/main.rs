@@ -126,7 +126,7 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLoc
                 match json {
                     Ok(cmd) => {
                         match cmd {
-                            ClientCommand::Status() => {
+                            ClientCommand::Status => {
                                 let mut info = server_lock.info();
                                 info.clients = serde_json::to_value(&state_lock.read().await.clients).unwrap();
                                 tx_lock.unbounded_send(Message::from(encode_cmd(
@@ -137,7 +137,7 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLoc
                                 let server = Server::create(name, server);
                                 state_lock.write().await.servers.insert(server.id().clone(), server);
                             },
-                            ClientCommand::ListServers() => {
+                            ClientCommand::ListServers => {
                                 let state = state_lock.read().await;
                                 tx_lock.unbounded_send(Message::from(encode_cmd(
                                     &ServerCommand::ServerList(state.servers.values().map(|srv| {
@@ -154,6 +154,7 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLoc
                         tx_lock.unbounded_send(Message::from(encode_cmd(
                             &ServerCommand::Print("Unknown command".to_string())
                         ))).unwrap();
+                        warn!("Unknown ClientCommand received: '{:?}'", json);
                     }
                 }
             }

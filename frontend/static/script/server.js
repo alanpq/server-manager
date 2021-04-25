@@ -35,7 +35,7 @@ conn.onopen = () => {
     conn.send(msg)
   };
   conn.sendCmd({
-    type: "stats"
+    type: "Status"
   });
   stats.updateStats();
 }

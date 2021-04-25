@@ -18,9 +18,9 @@ pub enum ServerCommand {
 #[derive(Deserialize)]
 #[serde(tag = "type", content = "body")]
 pub enum ClientCommand {
-  Status(),
+  Status,
 
   CreateServer{name: String, server: CommunicatorType},
   RemoveServer(Uuid),
-  ListServers(),
+  ListServers,
 }
