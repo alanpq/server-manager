@@ -124,10 +124,12 @@ conn.oncmd = (cmd) => {
     case "ServerList":
       for(let i = 0; i < cmd.body.length; i++) { // TODO: handle server deletion
         const srv = cmd.body[i];
-        if(state.servers[srv.id] !== undefined)
+        if(state.servers[srv.id] !== undefined) {
           srv.log = state.servers[srv.id].log;
-        else
+          srv.tab = state.servers[srv.id].tab;
+        } else {
           srv.log = []
+        }
         state.servers[srv.id] = srv;
 
         if(state.curSrv === undefined) state.curSrv = srv.id;

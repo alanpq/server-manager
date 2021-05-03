@@ -101,7 +101,7 @@ class Console {
     - dont push immediately to dom tree
   */
   addLine(content="", className="out", color="transparent") {
-    if(!this.initialized) return; // maybe add undisplayable messages to a queue of sorts
+    if(!this.initialized) return; //TODO: maybe add undisplayable messages to a queue of sorts
     const line = document.createElement("section");
     line.className = className;
     line.style.backgroundColor = color;
