@@ -33,16 +33,34 @@ const updateSocketStatus = () => {
   stats.stats.websocket = socketStates[conn.socket.readyState];
 }
 
+const switchServer = (newId) => {
+  state.curSrv = newId;
+  conn.sendCmd({
+    type: "SetServer",
+    body: newId
+  });
+  conn.sendCmd({
+    type: "ServerLog"
+  });
+}
+
 // timestamp bug will get fixed once i do serverside timestamping
 const redrawConsole = () => {
   serverConsole.log.innerHTML = "";
   const srv = state.servers[state.curSrv];
-  for(let i = 0; i < srv.log.length; i++) {
-    addLine(srv.log[i][0], srv.log[i][1], srv.log[i][2], false);
+  // TODO: do infinite scroll type thing instead of drawing all pages at once
+  for(let i = 0; i < srv.pages.length; i++) { 
+    for(let j = 0; j < srv.pages[i].length; j++) {
+      const l = srv.pages[i][j];
+      serverConsole.addLine(l.timestamp, l.body, l.msg_type.toLowerCase());
+    }
   }
+  // for(let i = 0; i < srv.log.length; i++) {
+  //   addLine(srv.log[i][0], srv.log[i][1], srv.log[i][2], false);
+  // }
 }
 
-const addLine = (txt, className, color, firstTime=true) => {
+const addLine = (txt, className, color=undefined, firstTime=true) => {
   if(firstTime) {
     if(className == "meta") { // meta messages arent specific to any 1 server
       Object.values(state.servers).forEach((srv) => {
@@ -52,7 +70,7 @@ const addLine = (txt, className, color, firstTime=true) => {
       state.servers[state.curSrv].log.push([txt, className, color]);
     }
   }
-  serverConsole.addLine(txt, className, color);
+  serverConsole.addLine(null, txt, className, color);
 }
 
 conn.onopen = () => {
@@ -127,12 +145,16 @@ conn.oncmd = (cmd) => {
         if(state.servers[srv.id] !== undefined) {
           srv.log = state.servers[srv.id].log;
           srv.tab = state.servers[srv.id].tab;
+          srv.pages = state.servers[srv.id].pages;
         } else {
-          srv.log = []
+          srv.log = [];
+          srv.pages = [];
         }
         state.servers[srv.id] = srv;
 
-        if(state.curSrv === undefined) state.curSrv = srv.id;
+        if(state.curSrv === undefined) {
+          switchServer(srv.id)
+        }
         if(srv.tab !== undefined) { // update existing server
           // TODO: add server tab updating
         } else { // add new server
@@ -149,10 +171,8 @@ conn.oncmd = (cmd) => {
                 type: "Status",
                 body: srv.id
               })
-              state.curSrv = srv.id;
-              redrawConsole();
+              switchServer(srv.id);
             }
-            state.curSrv = srv.id;
             e.preventDefault();
           }, false);
           
@@ -160,12 +180,19 @@ conn.oncmd = (cmd) => {
           state.dom.tabs.insertBefore(el, state.dom.addButton);
         }
       }
-
       
       conn.sendCmd({
         type: "Status",
         body: state.curSrv
       });
+    break;
+
+    case "ServerLog":
+      if(!state.servers[cmd.body.server_id]) return;
+      const srv = state.servers[cmd.body.server_id];
+      srv.pages[cmd.body.page_no] = cmd.body.messages;
+
+      if(cmd.body.server_id == state.curSrv) redrawConsole();
     break;
 
     default:

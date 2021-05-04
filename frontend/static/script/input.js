@@ -100,20 +100,26 @@ class Console {
     - clone element instead of creating scratch
     - dont push immediately to dom tree
   */
-  addLine(content="", className="out", color="transparent") {
+  addLine(timestamp=null, content="", className="out", color="transparent") {
     if(!this.initialized) return; //TODO: maybe add undisplayable messages to a queue of sorts
     const line = document.createElement("section");
     line.className = className;
     line.style.backgroundColor = color;
-    const timestamp = document.createElement("h2");
-    const now = new Date();
-    timestamp.innerText = formatTimestamp(now);
-    timestamp.title = now.toTimeString();
+    const timestamp_el = document.createElement("h2");
+    if(!timestamp) { 
+      const now = new Date();
+      timestamp_el.innerText = formatTimestamp(now);
+      timestamp_el.title = now.toTimeString();
+    } else {
+      const t = new Date(timestamp*1000); // convert from sec to ms
+      timestamp_el.innerText = formatTimestamp(t);
+      timestamp_el.title = t.toTimeString();
+    }
     const body = document.createElement("p");
     console.log(content);
     body.innerText = content;
   
-    line.appendChild(timestamp);
+    line.appendChild(timestamp_el);
     line.appendChild(body);
     this.log.appendChild(line);
     
