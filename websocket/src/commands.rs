@@ -23,6 +23,7 @@ pub enum ClientCommand {
   Command{id: Uuid, cmd: String},
   Status(Option<Uuid>), // get status of server
 
+  SetServer(Uuid), // set client's current server id
   ServerLog(Option<usize>), // get page of server log (if no page specified, return last page)
 
   CreateServer,

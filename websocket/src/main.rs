@@ -130,13 +130,31 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLoc
                                 }
                                 tx_lock.unbounded_send(Message::from(res)).unwrap();
                             },
+                            ClientCommand::SetServer(id) => {
+                                let mut state = state_lock.write().await;
+                                match state.servers.get(&id) {
+                                    Some(_) => {
+                                        let mut new_c = client.clone();
+                                        new_c.server = Some(id);
+                                        state.clients.insert(client.uuid, new_c);
+                                        debug!("set client server to {}", id);
+                                    },
+                                    None => {
+                                        tx_lock.unbounded_send(Message::from(encode_cmd(
+                                            &ServerCommand::Print("Server not found.".to_string())
+                                        ))).unwrap();
+                                        debug!("could not find server id {}", id);
+                                    }
+                                }
+                            },
                             ClientCommand::ServerLog(page_no) => {
                                 // messages are grouped in pages of some size
                                 // these pages are numbered in ascending order of timestamp
-                                
+                                let state = state_lock.read().await;
+                                let client = state.clients.get(&client.uuid).expect("client should exist");
                                 match client.server {
                                     Some(srv) => {
-                                        match state_lock.read().await.servers.get(&srv) {
+                                        match state.servers.get(&srv) {
                                             Some(srv) => {
                                                 let page_no = page_no.unwrap_or_else(|| { // if no page specified, get last page
                                                     srv.message_count() / server::PAGE_SIZE
@@ -147,11 +165,16 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLoc
                                                         messages: srv.get_page(page_no)
                                                     }
                                                 ))).unwrap();
+                                                debug!("sent ServerLog");
                                             },
-                                            None => {}
+                                            None => {
+                                                debug!("could not find server id {}", srv);
+                                            }
                                         }
                                     },
-                                    None => {},
+                                    None => {
+                                        debug!("client does not have assigned server id")
+                                    },
                                 }
                                 
                             }
