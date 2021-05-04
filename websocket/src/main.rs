@@ -162,7 +162,8 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLoc
                                                 tx_lock.unbounded_send(Message::from(encode_cmd(
                                                     &ServerCommand::ServerLog{
                                                         page_no,
-                                                        messages: srv.get_page(page_no)
+                                                        messages: srv.get_page(page_no),
+                                                        server_id: srv.id().clone(),
                                                     }
                                                 ))).unwrap();
                                                 debug!("sent ServerLog");

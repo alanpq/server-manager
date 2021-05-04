@@ -11,7 +11,7 @@ pub enum ServerCommand {
   ForeignCommand{id: Uuid, cmd: String, out: String},
   Identity(Client),
 
-  ServerLog{page_no: usize, messages: Vec<Message>},
+  ServerLog{page_no: usize, messages: Vec<Message>, server_id: Uuid},
 
   ServerList(Vec<ServerInfo>)
 }
