@@ -1,4 +1,4 @@
-use std::{fmt, rc};
+use std::{fmt};
 use async_trait::async_trait;
 
 #[derive(Debug)]
@@ -23,7 +23,7 @@ impl fmt::Display for Error {
 }
 
 impl From<rcon::Error> for Error {
-  fn from(cause: rcon::Error) -> Error {
+  fn from(_cause: rcon::Error) -> Error {
     Error::ConnectionError
   }
 }

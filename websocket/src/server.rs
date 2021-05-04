@@ -1,9 +1,8 @@
-use std::borrow::BorrowMut;
-
-use crate::{communicator::{self, Communicator}, communicators::{CommunicatorType, csgo::CSGORcon}, state::State};
+use crate::{communicator::{self, Communicator}, communicators::{CommunicatorType, csgo::CSGORcon}};
 use serde::{Serialize, Deserialize};
 use serde_json::Value;
 use uuid::Uuid;
+use chrono::{Utc};
 
 #[derive(Debug)]
 #[derive(Serialize, Deserialize)]
@@ -27,11 +26,40 @@ pub struct ServerInfo {
   pub communicator: CommunicatorStatus,
   pub clients: Value,
 }
+#[derive(Debug)]
+#[derive(Serialize, Deserialize)]
+#[derive(Clone)]
+pub enum MessageType {
+  IN,
+  OUT
+}
+
+#[derive(Debug)]
+#[derive(Serialize, Deserialize)]
+#[derive(Clone)]
+pub struct Message {
+  pub timestamp: i64,
+  pub body: String,
+  pub msg_type: MessageType,
+}
+
+impl Message {
+  pub fn new(body: String, msg_type: MessageType) -> Message {
+    Message {
+      timestamp: Utc::now().timestamp(),
+      body,
+      msg_type,
+    }
+  }
+}
+
+pub const PAGE_SIZE: usize = 50; // server page size, in messages
 
 pub struct Server {
   id: Uuid,
   info: ServerInfo,
-  communicator: Option<Box<dyn Communicator + Send + Sync>>
+  communicator: Option<Box<dyn Communicator + Send + Sync>>,
+  messages: Vec<Message>,
 }
 
 impl Server {
@@ -45,7 +73,8 @@ impl Server {
         communicator: CommunicatorStatus::DISCONNECTED,
         clients: Value::Null,
       },
-      communicator
+      communicator,
+      messages: Vec::new(),
     }
   }
   // TODO: better server creation infra
@@ -75,7 +104,10 @@ impl Server {
   pub async fn send_cmd(&mut self, cmd: String) -> String {
     match self.communicator.as_mut() {
       Some(communicator) => {
-        communicator.send_cmd(cmd).await
+        let r = communicator.send_cmd(cmd.clone()).await;
+        self.messages.push(Message::new(cmd, MessageType::IN));
+        self.messages.push(Message::new(r.clone(), MessageType::OUT));
+        r
       },
       None => {
         String::new()
@@ -100,8 +132,16 @@ impl Server {
         self.info.communicator = CommunicatorStatus::MISSING;
         Ok(())
       }
-    }
-    
+    } 
+  }
+
+  pub fn get_page(&self, page_no: usize) -> Vec<Message> {
+    let start = page_no*PAGE_SIZE;
+    self.messages[start..start+PAGE_SIZE].to_vec()
+  }
+
+  pub fn message_count(&self) -> usize {
+    self.messages.len()
   }
   
   pub fn info(&self) -> ServerInfo {

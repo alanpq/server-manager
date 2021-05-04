@@ -45,6 +45,7 @@ fn encode_cmd(cmd: &ServerCommand) -> Vec<u8> {
     Vec::from(encode(serde_json::to_string(cmd).unwrap()).as_bytes())
 }
 
+
 async fn handle_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLock<State>>) -> Result<()> {
     let ws_stream = accept_async(stream).await.expect("Failed to accept");
 
@@ -60,7 +61,8 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLoc
         uuid: uuid::Uuid::new_v4(),
         name: "hey".to_string(),
         hue: random(),
-        sender: tx.clone()
+        sender: tx.clone(),
+        server: None,
     };
     // let mut state_w = ;
     state.write().await.clients.insert(client.uuid, client.clone());
@@ -83,28 +85,20 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLoc
     //     ))).unwrap();
     // }
 
-    // let server_cell = Arc::new(Mutex::new(server));
     let state_cell = Arc::new(Mutex::new(state));
     let tx_cell = Arc::new(Mutex::new(tx.clone()));
     
     // TODO: auth
     let process_incoming = incoming.try_for_each(|msg| async {
-        // let mut server_lock = server_cell.lock().await;
         let state_lock = state_cell.lock().await;
         let tx_lock = tx_cell.lock().await;
         // TODO: commands can be separated for better organization, code reuse, error handling, etc
         match msg {
-            Message::Text(msg) => {},
+            Message::Text(_) => {},
             Message::Binary(bin) => {
-                // bin.into_iter().map(|b| {
-                //     println!("{}",b);
-                //     b
-                // });
-
                 let json = str::from_utf8(&bin).unwrap();
                 let json = decode(json).unwrap();
                 let json_str = str::from_utf8(&json).unwrap();
-                // let json: Value = serde_json::from_str(json).unwrap();
                 let json = serde_json::from_str::<ClientCommand>(json_str);
                 match json {
                     Ok(cmd) => {
@@ -136,6 +130,31 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLoc
                                 }
                                 tx_lock.unbounded_send(Message::from(res)).unwrap();
                             },
+                            ClientCommand::ServerLog(page_no) => {
+                                // messages are grouped in pages of some size
+                                // these pages are numbered in ascending order of timestamp
+                                
+                                match client.server {
+                                    Some(srv) => {
+                                        match state_lock.read().await.servers.get(&srv) {
+                                            Some(srv) => {
+                                                let page_no = page_no.unwrap_or_else(|| { // if no page specified, get last page
+                                                    srv.message_count() / server::PAGE_SIZE
+                                                });
+                                                tx_lock.unbounded_send(Message::from(encode_cmd(
+                                                    &ServerCommand::ServerLog{
+                                                        page_no,
+                                                        messages: srv.get_page(page_no)
+                                                    }
+                                                ))).unwrap();
+                                            },
+                                            None => {}
+                                        }
+                                    },
+                                    None => {},
+                                }
+                                
+                            }
                             ClientCommand::Status(id) => {
                                 if id.is_none() {
                                     return Ok(());
@@ -166,7 +185,7 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLoc
                                     }).collect())
                                 ))).unwrap();
                             },
-                            ClientCommand::UpdateServer{id, name, communicatorType} => {
+                            ClientCommand::UpdateServer{id, name, communicator_type} => {
 
                             }
                             ClientCommand::ListServers => {
@@ -212,7 +231,6 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLoc
     
     // receive_from_others.await;
     future::select(process_incoming, receive_from_others).await;
-    // future::select(broadcast_incoming, receive_from_others).await;
 
     info!("{} disconnected", &peer);
     state_cell.lock().await.write().await.clients.remove(&client.uuid);
@@ -231,7 +249,7 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLoc
 async fn main() {
     env_logger::init();
 
-    let mut state = Arc::new(RwLock::new(State::new()));
+    let state = Arc::new(RwLock::new(State::new()));
 
     let mut server = Server::new("ein csgo server".to_string(), Some(Box::new(CSGORcon::new())));
     server.connect("ein:27015", "bruh").await.ok();

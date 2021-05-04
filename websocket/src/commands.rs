@@ -1,4 +1,4 @@
-use crate::{communicators::CommunicatorType, server::ServerInfo, state::Client};
+use crate::{communicators::CommunicatorType, server::{Message, ServerInfo}, state::Client};
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 
@@ -11,6 +11,8 @@ pub enum ServerCommand {
   ForeignCommand{id: Uuid, cmd: String, out: String},
   Identity(Client),
 
+  ServerLog{page_no: usize, messages: Vec<Message>},
+
   ServerList(Vec<ServerInfo>)
 }
 
@@ -21,8 +23,10 @@ pub enum ClientCommand {
   Command{id: Uuid, cmd: String},
   Status(Option<Uuid>), // get status of server
 
+  ServerLog(Option<usize>), // get page of server log (if no page specified, return last page)
+
   CreateServer,
-  UpdateServer{id: Uuid, name: Option<String>, communicatorType: Option<CommunicatorType>},
+  UpdateServer{id: Uuid, name: Option<String>, communicator_type: Option<CommunicatorType>},
   RemoveServer(Uuid),
   ListServers,
 }
