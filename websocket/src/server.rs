@@ -103,15 +103,17 @@ impl Server {
   } 
 
   pub async fn send_cmd(&mut self, cmd: String) -> String {
+    self.messages.push(Message::new(cmd.clone(), MessageType::IN));
     match self.communicator.as_mut() {
       Some(communicator) => {
-        let r = communicator.send_cmd(cmd.clone()).await;
-        self.messages.push(Message::new(cmd, MessageType::IN));
+        let r = communicator.send_cmd(cmd).await;
         self.messages.push(Message::new(r.clone(), MessageType::OUT));
         r
       },
       None => {
-        String::new()
+        let s = "No communicator has been set up!".to_string();
+        self.messages.push(Message::new(s.clone(), MessageType::OUT));
+        s
       }
     }
   }
