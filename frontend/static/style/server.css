@@ -25,6 +25,11 @@ nav a {
 
   user-select: none;
   cursor: pointer;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  height: 1em;
 }
 
 nav a.active {
