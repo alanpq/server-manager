@@ -3,6 +3,7 @@ use serde::{Serialize, Deserialize};
 use serde_json::Value;
 use uuid::Uuid;
 use chrono::{Utc};
+use std::cmp;
 
 #[derive(Debug)]
 #[derive(Serialize, Deserialize)]
@@ -137,7 +138,7 @@ impl Server {
 
   pub fn get_page(&self, page_no: usize) -> Vec<Message> {
     let start = page_no*PAGE_SIZE;
-    self.messages[start..start+PAGE_SIZE].to_vec()
+    self.messages[start.. cmp::min(start+PAGE_SIZE, self.messages.len())].to_vec()
   }
 
   pub fn message_count(&self) -> usize {
