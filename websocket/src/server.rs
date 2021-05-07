@@ -56,15 +56,17 @@ impl Message {
 
 pub const PAGE_SIZE: usize = 50; // server page size, in messages
 
+type BoxedCommunicator = Box<dyn Communicator + Send + Sync>;
+
 pub struct Server {
   id: Uuid,
   info: ServerInfo,
-  communicator: Option<Box<dyn Communicator + Send + Sync>>,
+  communicator: Option<BoxedCommunicator>,
   messages: Vec<Message>,
 }
 
 impl Server {
-  pub fn new(name: String, communicator: Option<Box<dyn Communicator + Send + Sync>>) -> Server {
+  pub fn new(name: String, communicator: Option<BoxedCommunicator>) -> Server {
     let id = Uuid::new_v4();
     Server {
       id,
@@ -149,6 +151,17 @@ impl Server {
   
   pub fn info(&self) -> ServerInfo {
     return self.info.clone();
+  }
+
+  pub fn get_settings(&mut self) -> Value {
+    match self.communicator.as_mut() {
+      Some(comm) => {
+        comm.settings()
+      },
+      None => {
+        Value::Null
+      }
+    }
   }
 
   fn name(&self) -> &String {

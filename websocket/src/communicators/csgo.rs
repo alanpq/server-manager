@@ -1,15 +1,22 @@
 use crate::communicator::Communicator;
 use async_trait::async_trait;
 use rcon::Connection;
+use serde::Serialize;
+use serde_json::{Value, json};
+use log::*;
 
+#[derive(Serialize)]
 pub struct CSGORcon {
+  #[serde(skip)]
   conn: Option<Connection>,
+  password: String,
 }
 
 impl CSGORcon {
   pub fn new() -> CSGORcon {
     CSGORcon {
       conn: None,
+      password: String::new(),
     }
   }
 }
@@ -27,5 +34,22 @@ impl Communicator for CSGORcon {
     let conn = Connection::builder().connect(address, password).await?;
     self.conn = Some(conn);
     Ok(())
+  }
+
+  fn settings(&self) -> Value {
+    match serde_json::to_value(self) {
+      Ok(json) => {
+        json
+      },
+      Err(err) => {
+        error!("could not obtain settings");
+        error!("{}", err);
+        Value::Null
+      }
+    }
+  }
+
+  fn update_settings(&mut self, new: Value) -> Result<(), Box<dyn std::error::Error>> {
+      Ok(()) // TODO: implement me
   }
 }

@@ -1,5 +1,6 @@
 use std::{fmt};
 use async_trait::async_trait;
+use serde_json::Value;
 
 #[derive(Debug)]
 pub enum Error {
@@ -32,4 +33,7 @@ impl From<rcon::Error> for Error {
 pub trait Communicator {
   async fn send_cmd(&mut self, cmd: String) -> String;
   async fn connect(&mut self, address: &str, password: &str) -> Result<(), rcon::Error>;
+
+  fn settings(&self) -> Value;
+  fn update_settings(&mut self, new: Value) -> Result<(), Box<dyn std::error::Error>>;
 }
