@@ -33,6 +33,7 @@ class Connection {
     }
 
     sendCmd(cmd) {
+        console.log('sending cmd: ', cmd)
         this.socket.send(Uint8Array.from(btoa(JSON.stringify(cmd)), c=>c.charCodeAt(0)).buffer);
     }
 
