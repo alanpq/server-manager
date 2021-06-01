@@ -155,8 +155,8 @@ impl Server {
     return self.info.clone();
   }
 
-  pub fn get_settings(&mut self) -> Value {
-    match self.communicator.as_mut() {
+  pub fn get_settings(&self) -> Value {
+    match self.communicator.as_ref() {
       Some(comm) => {
         comm.settings()
       },

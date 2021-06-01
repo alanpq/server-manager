@@ -31,6 +31,7 @@ use tungstenite::{Result, Message};
 use serde_json::Value;
 
 use futures_channel::mpsc::{unbounded};
+use crate::commands::process_command;
 
 async fn accept_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLock<State>>) {
     if let Err(e) = handle_connection(peer, stream, state).await {
@@ -85,13 +86,14 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLoc
     //     ))).unwrap();
     // }
 
-    let state_cell = Arc::new(Mutex::new(state));
-    let tx_cell = Arc::new(Mutex::new(tx.clone()));
+    // let state_cell = Arc::new(Mutex::new(state));
+    let tx = Arc::new(Mutex::new(tx.clone()));
     
     // TODO: auth
     let process_incoming = incoming.try_for_each(|msg| async {
-        let state_lock = state_cell.lock().await;
-        let tx_lock = tx_cell.lock().await;
+        // let state_lock = state_cell.lock().await;
+        // let s = state.write().await;
+        // let tx_lock = tx_cell.lock().await;
         // TODO: commands can be separated for better organization, code reuse, error handling, etc
         match msg {
             Message::Text(_) => {},
@@ -100,136 +102,16 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLoc
                 let json = decode(json).unwrap();
                 let json_str = str::from_utf8(&json).unwrap();
                 let json = serde_json::from_str::<ClientCommand>(json_str);
+
                 match json {
                     Ok(cmd) => {
-                        match cmd {
-                            ClientCommand::Command{id, cmd} => {
-                                // TODO: use timestamp from when the res is actually generated, not when client receives it
-                                debug!("received command for {} -> '{}'", id, cmd);
-                                let mut state = state_lock.write().await;
-                                let server = state.servers.get_mut(&id);
-                                if server.is_none() {
-                                    warn!("Server '{}' not found.", &id);
-                                    return Ok(());
-                                }
-                                let server = server.unwrap();
-                                debug!("server found: {:?}", server.info());
-
-                                let res = server.send_cmd(cmd.clone()).await;
-                                for other in state.clients.values() {
-                                    if other.uuid == client.uuid {
-                                        continue;
-                                    }
-                                    debug!("sending to {}...", other.uuid);
-                                    other.sender.unbounded_send(Message::from(encode_cmd(&ServerCommand::ForeignCommand{
-                                        id: client.uuid,
-                                        cmd: cmd.clone(),
-                                        out: res.clone()
-                                    }))).unwrap();
-                                    
-                                }
-                                tx_lock.unbounded_send(Message::from(res)).unwrap();
-                            },
-                            ClientCommand::SetServer(id) => {
-                                let mut state = state_lock.write().await;
-                                match state.servers.get(&id) {
-                                    Some(_) => {
-                                        let mut new_c = client.clone();
-                                        new_c.server = Some(id);
-                                        state.clients.insert(client.uuid, new_c);
-                                        debug!("set client server to {}", id);
-                                    },
-                                    None => {
-                                        tx_lock.unbounded_send(Message::from(encode_cmd(
-                                            &ServerCommand::Print("Server not found.".to_string())
-                                        ))).unwrap();
-                                        debug!("could not find server id {}", id);
-                                    }
-                                }
-                            },
-                            ClientCommand::ServerLog(page_no) => {
-                                // messages are grouped in pages of some size
-                                // these pages are numbered in ascending order of timestamp
-                                let state = state_lock.read().await;
-                                let client = state.clients.get(&client.uuid).expect("client should exist");
-                                match client.server {
-                                    Some(srv) => {
-                                        match state.servers.get(&srv) {
-                                            Some(srv) => {
-                                                let page_no = page_no.unwrap_or_else(|| { // if no page specified, get last page
-                                                    srv.message_count() / server::PAGE_SIZE
-                                                });
-                                                tx_lock.unbounded_send(Message::from(encode_cmd(
-                                                    &ServerCommand::ServerLog{
-                                                        page_no,
-                                                        messages: srv.get_page(page_no),
-                                                        server_id: *srv.id(),
-                                                    }
-                                                ))).unwrap();
-                                                debug!("sent ServerLog");
-                                            },
-                                            None => {
-                                                debug!("could not find server id {}", srv);
-                                            }
-                                        }
-                                    },
-                                    None => {
-                                        debug!("client does not have assigned server id")
-                                    },
-                                }
-                                
-                            }
-                            ClientCommand::Status(id) => {
-                                if id.is_none() {
-                                    return Ok(());
-                                }
-                                let id = id.unwrap();
-                                let mut state = state_lock.write().await;
-                                let server = state.servers.get_mut(&id);
-                                if server.is_none() {
-                                    return Ok(());
-                                }
-                                let server = server.unwrap();
-                
-                                let mut info = server.info();
-                                info.settings = server.get_settings();
-                                drop(state);
-                                info.clients = serde_json::to_value(&state_lock.read().await.clients).unwrap();
-                                tx_lock.unbounded_send(Message::from(encode_cmd(
-                                    &ServerCommand::Status(info)
-                                ))).unwrap();
-                            },
-                            ClientCommand::CreateServer => {
-                                let mut server = Server::create("new server ".to_string() + &state_lock.read().await.servers.len().to_string(), None);
-                                server.connect("192.168.1.16", "bruh").await.unwrap();
-                                state_lock.write().await.servers.insert(*server.id(), server);
-
-                                // arghhhh no code reuse >:((((
-                                let state = state_lock.read().await;
-                                tx_lock.unbounded_send(Message::from(encode_cmd(
-                                    &ServerCommand::ServerList(state.servers.values().map(|srv| {
-                                        srv.info()
-                                    }).collect())
-                                ))).unwrap();
-                            },
-                            ClientCommand::UpdateServer{id, name, communicator_type} => {
-
-                            }
-                            ClientCommand::ListServers => {
-                                let state = state_lock.read().await;
-                                tx_lock.unbounded_send(Message::from(encode_cmd(
-                                    &ServerCommand::ServerList(state.servers.values().map(|srv| {
-                                        srv.info()
-                                    }).collect())
-                                ))).unwrap();
-                            },
-                            ClientCommand::RemoveServer(id) => {
-                                state_lock.write().await.servers.remove(&id);
-                            }
+                        if let Some(resp) = process_command(cmd, &client.uuid, state.as_ref()).await {
+                            // commands can return tungstenite::Message's to send back to the client
+                            tx.lock().await.unbounded_send(resp).unwrap();
                         }
                     },
                     Err(err) => {
-                        tx_lock.unbounded_send(Message::from(encode_cmd(
+                        tx.lock().await.unbounded_send(Message::from(encode_cmd(
                             &ServerCommand::Print("Unknown command".to_string())
                         ))).unwrap();
                         warn!("Could not resolve ClientCommand:");
@@ -247,7 +129,7 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLoc
                 }
             }
             _ => {
-                tx_lock.unbounded_send(msg.clone()).unwrap();
+                // tx_lock.unbounded_send(msg.clone()).unwrap();
             }
         }
         Ok(())
@@ -260,7 +142,7 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLoc
     future::select(process_incoming, receive_from_others).await;
 
     info!("{} disconnected", &peer);
-    state_cell.lock().await.write().await.clients.remove(&client.uuid);
+    state.write().await.clients.remove(&client.uuid);
     
     // TODO: bring back client leave broadcasts
     // for other in state_cell.lock().await.read().await.clients.values() {        
