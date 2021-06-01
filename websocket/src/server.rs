@@ -25,6 +25,7 @@ pub struct ServerInfo {
   pub id: Uuid,
   pub name: String,
   pub communicator: CommunicatorStatus,
+  pub settings: Value,
   pub clients: Value,
 }
 #[derive(Debug)]
@@ -74,6 +75,7 @@ impl Server {
         id, 
         name,
         communicator: CommunicatorStatus::DISCONNECTED,
+        settings: Value::Null,
         clients: Value::Null,
       },
       communicator,

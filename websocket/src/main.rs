@@ -36,7 +36,7 @@ async fn accept_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLoc
     if let Err(e) = handle_connection(peer, stream, state).await {
         match e {
             Error::ConnectionClosed | Error::Protocol(_) | Error::Utf8 => (),
-            err => error!("Error processing connection: {}", err),
+            err => error!("Error processing connection: {:?}", err),
         }
     }
 }
@@ -163,7 +163,7 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLoc
                                                     &ServerCommand::ServerLog{
                                                         page_no,
                                                         messages: srv.get_page(page_no),
-                                                        server_id: srv.id().clone(),
+                                                        server_id: *srv.id(),
                                                     }
                                                 ))).unwrap();
                                                 debug!("sent ServerLog");
@@ -184,22 +184,25 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLoc
                                     return Ok(());
                                 }
                                 let id = id.unwrap();
-                                let state = state_lock.read().await;
-                                let server = state.servers.get(&id);
+                                let mut state = state_lock.write().await;
+                                let server = state.servers.get_mut(&id);
                                 if server.is_none() {
                                     return Ok(());
                                 }
                                 let server = server.unwrap();
                 
                                 let mut info = server.info();
+                                info.settings = server.get_settings();
+                                drop(state);
                                 info.clients = serde_json::to_value(&state_lock.read().await.clients).unwrap();
                                 tx_lock.unbounded_send(Message::from(encode_cmd(
                                     &ServerCommand::Status(info)
                                 ))).unwrap();
                             },
                             ClientCommand::CreateServer => {
-                                let server = Server::create("new server ".to_string() + &state_lock.read().await.servers.len().to_string(), None);
-                                state_lock.write().await.servers.insert(server.id().clone(), server);
+                                let mut server = Server::create("new server ".to_string() + &state_lock.read().await.servers.len().to_string(), None);
+                                server.connect("192.168.1.16", "bruh").await.unwrap();
+                                state_lock.write().await.servers.insert(*server.id(), server);
 
                                 // arghhhh no code reuse >:((((
                                 let state = state_lock.read().await;
@@ -278,7 +281,7 @@ async fn main() {
     let mut server = Server::new("ein csgo server".to_string(), Some(Box::new(CSGORcon::new())));
     server.connect("ein:27015", "bruh").await.ok();
 
-    state.write().await.servers.insert(server.id().clone(), server);
+    state.write().await.servers.insert(*server.id(), server);
 
     let addr = "0.0.0.0:18249";
     let listener = TcpListener::bind(&addr).await.expect("Can't listen");

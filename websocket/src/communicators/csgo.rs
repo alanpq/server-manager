@@ -9,6 +9,7 @@ use log::*;
 pub struct CSGORcon {
   #[serde(skip)]
   conn: Option<Connection>,
+  #[serde(rename = "password/password")]
   password: String,
 }
 
