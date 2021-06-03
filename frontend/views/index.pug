@@ -1,31 +1,16 @@
 extends partials/base.pug
 
-block head 
-  link(rel="stylesheet", href="style/server.css")
-  script(src="script/input.js", defer) 
-  script(src="script/stats.js", defer)
-  script(src="script/ws.js", defer)
-  script(src="script/index.js", defer)
+block head
+    link(rel="stylesheet", href="style/index.css")
 
 block header
-  nav
-    //- span.grow
-    a.new +
 
-block main 
-  article.output
-  article.stats
-    h1#name
-    h2 WebSocket 
-    p#ws-status.DISCONNECTED DISCONNECTED
-    h2 Communicator 
-    p#com-status.DISCONNECTED DISCONNECTED
-    hr#pre-settings
-    
-    ul#clients
-  div.console.readonly
-    .caret(style="visibility: hidden;")
-    .selection
-    .content
-    .dropdown
-    textarea.console(type="text", autocomplete="off", readonly)
+block main
+    form(action="/", method="post")
+        label Username
+        input(type="text", name="username")
+        label Password
+        input(type="password", name="password")
+        input(type="submit", value="Log In")
+        each msg in messages
+            section.error=msg
