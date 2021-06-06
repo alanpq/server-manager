@@ -17,11 +17,21 @@ if (!fs.existsSync(users_path)) {
 
 const users = JSON.parse(fs.readFileSync(users_path));
 
+const njwt = require('njwt');
+
+const JWT_KEY = fs.readFileSync(path.join(__dirname, "..", "key.txt")).toString();
+if (JWT_KEY) {
+  console.log("JWT Key loaded.");
+} else {
+  console.error("JWT Key is empty (key.txt)!");
+}
+
 const bcrypt = require("bcrypt");
 const SALT_ROUNDS = 10;
 
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
+const ensure = require('connect-ensure-login');
 
 const save_user = (username, hash) => {
   users[username] = hash;
@@ -37,7 +47,7 @@ passport.use(new LocalStrategy(
         if (err || !result) {
           return done(null, false, {message: 'Invalid username/password.'});
         } else {
-          return done(null, {});
+          return done(null, username);
         }
       });
     } else {
@@ -85,6 +95,14 @@ app.get('/init', (req, res) => {
   res.render('init_creds', { messages: req.flash('error') });
 })
 
+app.get('/token', ensure.ensureLoggedIn('/'), (req, res) => {
+  const claims = { // TODO: maybe put client ip in jwt to prevent stealing
+    sub: req.user,
+  }
+  const jwt = njwt.create(claims, JWT_KEY);
+  res.send(jwt.compact());
+})
+
 app.post('/init', (req, res) => {
   if (Object.keys(users).length !== 0) {
     res.redirect('/');
@@ -101,8 +119,8 @@ app.post('/init', (req, res) => {
   });
 })
 
-app.get('/manager', (req, res) => {
-  res.render('manager')
+app.get('/manager', ensure.ensureLoggedIn('/'), (req, res) => {
+  res.render('manager', {user: req.user})
 });
 
 app.post('/',

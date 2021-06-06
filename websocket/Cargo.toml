@@ -25,8 +25,11 @@ futures = {version = "0.3", features = ["executor"]}
 futures-util = "0.3.14"
 futures-channel = "0.3.14"
 
+lazy_static = "1.4.0"
 async-trait = "0.1.50"
 
 uuid = { version = "0.8", features = ["v4", "serde"] } # uuid's fit well in this context.
-
+jwt = "0.14.0"
+hmac = "0.11.0"
+sha2 = "0.9.5"
 rcon = "0"

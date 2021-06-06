@@ -19,9 +19,12 @@ use std::str;
 use std::sync::{Arc};
 use std::sync::atomic::{Ordering};
 
+#[macro_use]
+extern crate lazy_static;
+
 use rand::random;
 
-use futures_util::{future, pin_mut, stream::TryStreamExt, SinkExt, StreamExt};
+use futures_util::{future, pin_mut, stream::TryStreamExt, SinkExt, StreamExt, Stream};
 use log::*;
 use std::net::SocketAddr;
 use tokio::net::{TcpListener, TcpStream};
@@ -36,6 +39,12 @@ use uuid::Uuid;
 use std::path::Path;
 use std::fs::File;
 use std::io::Write;
+use std::task::Poll;
+
+use jwt::VerifyWithKey;
+use hmac::{Hmac, NewMac};
+use sha2::Sha256;
+use std::collections::BTreeMap;
 
 async fn accept_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLock<State>>) {
     if let Err(e) = handle_connection(peer, stream, state).await {
@@ -50,21 +59,47 @@ fn encode_cmd(cmd: &ServerCommand) -> Vec<u8> {
     Vec::from(encode(serde_json::to_string(cmd).unwrap()).as_bytes())
 }
 
+lazy_static! {
+    static ref JWT_KEY: String = Uuid::new_v4().to_string();
+}
 
 async fn handle_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLock<State>>) -> Result<()> {
-    let ws_stream = accept_async(stream).await.expect("Failed to accept");
+    let mut ws_stream = accept_async(stream).await.expect("Failed to accept");
 
     info!("New WebSocket connection: {}", peer);
 
     // Use an unbounded channel to handle buffering and flushing of messages
     // to the websocket...
     let (tx, rx) = unbounded();
+    let name;
+    loop {
+        if let Some(Ok(msg)) = ws_stream.next().await {
+            if msg.is_text() {
+                let key: Hmac<Sha256> = Hmac::new_from_slice(JWT_KEY.as_ref()).unwrap();
+                match msg.to_text().unwrap().verify_with_key(&key) {
+                    Ok(claims) => {
+                        let claims: BTreeMap<String,Value> = claims;
+                        if let Some(s) = claims.get("sub") {
+                            if let Some(sub) = s.as_str() {
+                                name = sub.to_string();
+                                break; // TODO: check more things about this jwt
+                            }
+                        }
+                    },
+                    Err(err) => {
+                        info!("auth failed: {}", err);
+                    },
+                }
+                info!("attempted auth with {}", msg);
+            }
+        }
+    }
 
     let (mut outgoing, incoming) = ws_stream.split();
 
     let client = Client {
         uuid: uuid::Uuid::new_v4(),
-        name: "hey".to_string(),
+        name,
         hue: random(),
         sender: tx.clone(),
         server: None,
@@ -163,7 +198,6 @@ const JWT_KEY_PATH: &str = "../key.txt";
 #[tokio::main]
 async fn main() {
     env_logger::init();
-    let jwt_key = Uuid::new_v4().to_string();
 
     let path = Path::new(JWT_KEY_PATH);
     let display = path.display();
@@ -172,7 +206,7 @@ async fn main() {
         Ok(file) => file,
     };
 
-    match file.write_all(jwt_key.as_bytes()) {
+    match file.write_all(JWT_KEY.as_bytes()) {
         Err(why) => panic!("couldn't write jwt to {}: {}", display, why),
         Ok(_) => info!("successfully wrote jwt to {}", display),
     }

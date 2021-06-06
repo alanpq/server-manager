@@ -30,6 +30,10 @@ class Connection {
                 }).then(this.oncmd);
             }
         }.bind(this));
+        fetch(`http://${window.location.hostname}:${window.location.port}/token`).then(res => res.text()).then( token => {
+            this.send(token);
+        });
+    
     }
 
     sendCmd(cmd) {

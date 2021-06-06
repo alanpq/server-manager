@@ -94,10 +94,6 @@ conn.onopen = () => {
       }
     })
   };
-  conn.sendCmd({
-    type: "ListServers"
-  });
-  stats.updateStats();
 }
 
 conn.onclose = () => {
@@ -130,6 +126,9 @@ conn.oncmd = (cmd) => {
 
     case "Identity":
       stats.self = cmd.body;
+      conn.sendCmd({
+        type: "ListServers"
+      });
       stats.updateStats();
     break;
 
