@@ -32,6 +32,10 @@ use serde_json::Value;
 
 use futures_channel::mpsc::{unbounded};
 use crate::commands::process_command;
+use uuid::Uuid;
+use std::path::Path;
+use std::fs::File;
+use std::io::Write;
 
 async fn accept_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLock<State>>) {
     if let Err(e) = handle_connection(peer, stream, state).await {
@@ -154,9 +158,24 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream, state: Arc<RwLoc
     Ok(())
 }
 
+const JWT_KEY_PATH: &str = "../key.txt";
+
 #[tokio::main]
 async fn main() {
     env_logger::init();
+    let jwt_key = Uuid::new_v4().to_string();
+
+    let path = Path::new(JWT_KEY_PATH);
+    let display = path.display();
+    let mut file = match File::create(&JWT_KEY_PATH) {
+        Err(why) => panic!("couldn't create {}: {}", display, why),
+        Ok(file) => file,
+    };
+
+    match file.write_all(jwt_key.as_bytes()) {
+        Err(why) => panic!("couldn't write jwt to {}: {}", display, why),
+        Ok(_) => info!("successfully wrote jwt to {}", display),
+    }
 
     let state = Arc::new(RwLock::new(State::new()));
 
