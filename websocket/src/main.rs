@@ -243,8 +243,8 @@ async fn main() -> io::Result<()> {
     let mut keys = load_keys(&PathBuf::from("../ssl/server.key"))?;
     info!("{} keys loaded.", keys.len());
 
-    assert!(certs.len() > 0, "Must have at least 1 SSL Certificate Loaded!");
-    assert!(keys.len() > 0, "Must have at least 1 SSL Key Loaded!");
+    assert!(!certs.is_empty(), "Must have at least 1 SSL Certificate Loaded!");
+    assert!(!keys.is_empty(), "Must have at least 1 SSL Key Loaded!");
 
     let mut config = ServerConfig::new(NoClientAuth::new());
     config
