@@ -8,7 +8,7 @@ class Connection {
     }
 
     init() {
-        this.socket = new WebSocket(`ws://${window.location.hostname}:18249`);
+        this.socket = new WebSocket(`${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.hostname}:18249`);
         this.socket.addEventListener('open', this.onopen);
         this.socket.addEventListener('close', this.onclose);
         this.socket.addEventListener('error', this.onerror);
@@ -30,7 +30,7 @@ class Connection {
                 }).then(this.oncmd);
             }
         }.bind(this));
-        fetch(`http://${window.location.hostname}:${window.location.port}/token`).then(res => res.text()).then( token => {
+        fetch(`${window.location.protocol}//${window.location.hostname}:${window.location.port}/token`).then(res => res.text()).then( token => {
             this.send(token);
         });
     

@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
+const https = require('https');
 const express = require('express')
 const app = express()
 const port = process.env.PORT || 80
@@ -129,6 +130,14 @@ app.post('/',
     failureFlash: true })
 );
 
-app.listen(port, () => {
-  console.log(`Example app listening at http://0.0.0.0:${port}`)
-})
+// app.listen(port, () => {
+//   console.log(`Example app listening at http://0.0.0.0:${port}`)
+// })
+
+
+const https_server = https.createServer({
+  key: fs.readFileSync('../ssl/server.key', 'utf8'),
+  cert: fs.readFileSync('../ssl/server.cert', 'utf8'),
+}, app);
+
+https_server.listen(8443);
