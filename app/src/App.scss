@@ -7,6 +7,12 @@ html, body, #root {
 
   margin: 0;
   padding: 0;
+
+  font-family: 'Ubuntu', sans-serif;
+}
+
+button {
+  font-family: 'Ubuntu', sans-serif;
 }
 
 $NAV_HEIGHT: 2.5em;
@@ -135,6 +141,11 @@ main {
 
       color: #797c7e;
       cursor: pointer;
+
+      font-kerning: none;
+      font-size: 12px;
+      line-height: 14px;
+      letter-spacing: 0.12em;
 
       &:hover {
         color: #8f9192;
