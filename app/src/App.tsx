@@ -35,6 +35,7 @@ function ServerList(props: {
 
 function ServerTabs(props: {
   tabs: string[],
+  names: {[name: string]: string},
   curTab: number,
   onChange: (new_idx: number) => void,
 }) {
@@ -46,7 +47,7 @@ function ServerTabs(props: {
           className={index === props.curTab ? 'current' : ''}
           onClick={() => {props.onChange(index)}}
           key={index}
-        >{value}</button>
+        >{props.names[value]}</button>
       })
     }
     <span className="flex grow"/>
@@ -74,18 +75,33 @@ function ServerConsole() {
 }
 
 function App() {
+  const [serverNames, setServerNames]: [{[name: string]: string}, any] = useState({});
   const [tabs, setTabs]: [string[], any] = useState([]);
   const [tabIdx, setTabIdx] = useState(-1);
-  const [serverID, setServerID] = useState(-1); // index of current server (-1 for dashboard)
+
+  const list = useServerList();
+
+  useEffect(() => {
+    setServerNames((list as any).reduce((result:{[name: string]: string}, server: Server) => {
+      result[server.id] = server.name;
+      return result;
+    }, {}));
+  }, [list]);
+
   return (
     <>
       <header>
-        <ServerTabs tabs={tabs} curTab={tabIdx} onChange={(new_tab) => {setTabIdx(new_tab)}}/>
+        <ServerTabs tabs={tabs} names={serverNames} curTab={tabIdx} onChange={(new_tab) => {setTabIdx(new_tab)}}/>
       </header>
       <main>
         <ServerList onOpen={(srv) => {
-          setTabIdx(tabs.length);
-          setTabs(tabs.concat(srv.name))
+          const idx = tabs.indexOf(srv.id);
+          if (idx !== -1) {
+            setTabIdx(idx);
+          } else {
+            setTabIdx(tabs.length);
+            setTabs(tabs.concat(srv.id))
+          }
         }}/>
         <ServerDetails/>
         <article className="mini-console">
