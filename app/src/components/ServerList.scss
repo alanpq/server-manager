@@ -1,3 +1,5 @@
+$SERVER_HEIGHT: 54px;
+
 .server-list {
   margin: 0;
   padding: 0;
@@ -17,22 +19,27 @@
     grid-column: 1/4;
     grid-template-columns: subgrid;
 
+    align-items: center;
+
+    height: $SERVER_HEIGHT;
+
+    border-bottom: 1px solid #2E3338;
+
     &.current, &:hover {
-      background: rgba(255,255,255,0.1);
+      background: #2E3338;
     }
   }
 
   li > span {
     padding: 8px 1em;
-
     text-align: right;
 
-    color: #8e9193;
-    border-bottom: 1px solid #2b2f34;
+    opacity: .5;
+    color: #EEEEEE;
   }
 
   li > span:nth-child(3n + 1) {
-    color: #e2e3e3;
+    opacity: 1;
     text-align: left;
     font-size: 1rem;
   }
@@ -47,6 +54,7 @@
     background: none !important;
     justify-items: center;
     align-items: center;
+    border: none;
 
     height: 1.5em;
   }
@@ -55,7 +63,6 @@
     width: 100%;
     height: 100%;
 
-    border: none;
     align-items: center;
 
     text-align: center !important;
@@ -65,13 +72,18 @@
 
     transition: opacity 0.05s ease-in-out;
 
-    opacity: 0.2;
+    opacity: 0.2 !important;
     &:hover {
-      opacity: .4;
+      opacity: .4 !important;;
     }
 
     &.hide {
-      opacity: 0;
+      opacity: 0 !important;;
+    }
+
+    img {
+      transform: rotate(0deg);
+      transition: transform 0.2s ease-in-out;
     }
 
     &.ascend img {
