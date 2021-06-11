@@ -2,8 +2,8 @@ $NAV_HEIGHT: 2.5em;
 
 #root {
   display: grid;
-  grid-template-columns: auto;
-  grid-template-rows: $NAV_HEIGHT auto;
+  grid-template-columns: 1fr;
+  grid-template-rows: $NAV_HEIGHT 1fr;
 }
 
 @media (prefers-reduced-motion: no-preference) {

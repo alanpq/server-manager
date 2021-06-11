@@ -1,9 +1,13 @@
 main {
+  box-sizing: border-box;
   background: #222629;
   display: grid;
 
+  height: 100%;
+  width: 100%;
+
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
+  grid-template-rows: 1fr 50%;
 
   grid-template-areas:
           "LIST DETAILS"
