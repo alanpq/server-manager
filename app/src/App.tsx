@@ -1,18 +1,36 @@
 import React, {useEffect, useState} from 'react';
 import './App.scss';
+import {useServerList} from "./websocket/connection_service";
+import {Server} from "./modals/server";
 
-function ServerList() {
-  return <article className="server-list">
-    <span>CSGO Server</span>
-    <span>CSGO RCON</span>
-    <span>Online</span>
-    <span>Minecraft Server</span>
-    <span>Minecraft RCON</span>
-    <span>Online</span>
-    <span>FNAF 9 Server</span>
-    <span>Generic RCON</span>
-    <span>Online</span>
-  </article>;
+function ServerList(props: {
+  onOpen?: (server: Server) => void,
+  onChange?: (server_id: string) => void,
+}) {
+  const list = useServerList();
+  const [current, setCurrent] = useState(0);
+
+  return <ul className="server-list">
+      {
+        list.map((srv, index) => {
+          return <li
+            key={index}
+            className={index === current ? 'current' : ''}
+            onClick={() => {
+              setCurrent(index);
+            }}
+            onDoubleClick={() => {
+              if (props.onChange)
+                props.onChange(srv.id)
+            }}
+          >
+            <span title={srv.id}>{srv.name}</span>
+            <span>{srv.communicator}</span>
+            <span>HI</span>
+          </li>
+        })
+      }
+  </ul>;
 }
 
 function ServerTabs(props: { tabs: {id: string, name: string}[], onChange?: (new_id: string) => void }) {
@@ -71,7 +89,9 @@ function App() {
         <ServerTabs tabs={tabs} onChange={(new_id) => {console.log(new_id)}}/>
       </header>
       <main>
-        <ServerList/>
+        <ServerList onOpen={(srv) => {
+          setTabs(tabs.concat({id: srv.id, name: srv.name}))
+        }}/>
         <ServerDetails/>
         <article className="mini-console">
           <ServerConsole />

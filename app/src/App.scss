@@ -78,6 +78,9 @@ main {
 }
 
 .server-list {
+  margin: 0;
+  padding: 0;
+
   grid-area: LIST;
   display: grid;
   grid-template-columns: 2fr auto auto;
@@ -87,7 +90,17 @@ main {
   justify-content: center;
   align-items: center;
 
-  & > span {
+  li {
+    display: grid;
+    grid-column: 1/4;
+    grid-template-columns: subgrid;
+
+    &.current, &:hover {
+      background: rgba(255,255,255,0.1);
+    }
+  }
+
+  li > span {
     padding: 8px 1em;
 
     text-align: right;
@@ -96,15 +109,15 @@ main {
     border-bottom: 1px solid #2b2f34;
   }
 
-  & > span:nth-child(3n + 1) {
+  li > span:nth-child(3n + 1) {
     color: #e2e3e3;
     text-align: left;
     font-size: 1rem;
   }
-  & > span:nth-child(3n + 2) {
+  li > span:nth-child(3n + 2) {
     font-size: .9rem;
   }
-  & > span:nth-child(3n + 3) {
+  li > span:nth-child(3n + 3) {
     font-size: .9rem;
   }
 }
