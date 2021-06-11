@@ -2,87 +2,10 @@ import React, {useEffect, useState} from 'react';
 import './App.scss';
 import {useServerList} from "./websocket/connection_service";
 import {Server} from "./modals/server";
-
-function ServerList(props: {
-  onOpen?: (server: Server) => void,
-  onChange?: (server_id: string) => void,
-}) {
-  const list = useServerList();
-  const [current, setCurrent] = useState(-1);
-
-  return <ul className="server-list">
-      {
-        list.map((srv, index) => {
-          return <li
-            key={index}
-            className={index === current ? 'current' : ''}
-            onClick={() => {
-              if (props.onChange)
-                props.onChange(srv.id);
-              setCurrent(index);
-            }}
-            onDoubleClick={() => {
-              if (props.onOpen)
-                props.onOpen(srv)
-            }}
-          >
-            <span title={srv.id}>{srv.name}</span>
-            <span>{srv.communicator}</span>
-            <span>HI</span>
-          </li>
-        })
-      }
-  </ul>;
-}
-
-function ServerTabs(props: {
-  tabs: string[],
-  servers: {[name: string]: Server},
-  curTab: number,
-  onChange: (new_idx: number) => void,
-}) {
-  return <nav>
-    <button className={props.curTab === -1 ? 'current' : ''} onClick={() => {props.onChange(-1);}}>Dashboard</button>
-    {
-      props.tabs.map((value, index) => {
-        return <button
-          className={index === props.curTab ? 'current' : ''}
-          onClick={() => {props.onChange(index)}}
-          key={index}
-        >{props.servers[value].name}</button>
-      })
-    }
-    <span className="flex grow"/>
-    <button className="user">Username</button>
-  </nav>;
-}
-
-function ServerDetails(props: {
-  server: Server | null,
-}) {
-  if (props.server === null) {
-    return <article className="server-details">
-
-    </article>
-  } else {
-    return <article className="server-details">
-      <header>
-        <h1>{props.server.name}</h1>
-        <button>EDIT</button>
-        <button>SHUTDOWN</button>
-        <button>OPEN</button>
-        <span className="flex grow"/>
-        <button>DELETE</button>
-      </header>
-    </article>;
-  }
-}
-
-function ServerConsole() {
-  return <section className="console">
-
-  </section>;
-}
+import {ServerDetails} from "./components/ServerDetails";
+import {ServerConsole} from "./components/ServerConsole";
+import {ServerList} from "./components/ServerList";
+import {ServerTabs} from "./components/ServerTabs";
 
 function App() {
   const [servers, setServers]: [{[name: string]: Server}, any] = useState({});
