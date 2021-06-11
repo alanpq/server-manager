@@ -20,8 +20,8 @@ function ServerList(props: {
               setCurrent(index);
             }}
             onDoubleClick={() => {
-              if (props.onChange)
-                props.onChange(srv.id)
+              if (props.onOpen)
+                props.onOpen(srv)
             }}
           >
             <span title={srv.id}>{srv.name}</span>
@@ -33,24 +33,20 @@ function ServerList(props: {
   </ul>;
 }
 
-function ServerTabs(props: { tabs: {id: string, name: string}[], onChange?: (new_id: string) => void }) {
-  const [tabIdx, setTabIdx] = useState(-1);
-
-  useEffect(() => {
-    if (props.onChange) {
-      props.onChange(tabIdx !== -1 ? props.tabs[tabIdx].id : "");
-    }
-  }, [tabIdx]);
-
+function ServerTabs(props: {
+  tabs: string[],
+  curTab: number,
+  onChange: (new_idx: number) => void,
+}) {
   return <nav>
-    <button className={tabIdx === -1 ? 'current' : ''} onClick={() => {setTabIdx(-1)}}>Dashboard</button>
+    <button className={props.curTab === -1 ? 'current' : ''} onClick={() => {props.onChange(-1);}}>Dashboard</button>
     {
       props.tabs.map((value, index) => {
         return <button
-          className={index === tabIdx ? 'current' : ''}
-          onClick={() => {setTabIdx(index)}}
-          key={value.id}
-        >{value.name}</button>
+          className={index === props.curTab ? 'current' : ''}
+          onClick={() => {props.onChange(index)}}
+          key={index}
+        >{value}</button>
       })
     }
     <span className="flex grow"/>
@@ -79,18 +75,19 @@ function ServerConsole() {
 
 function App() {
   const [tabs, setTabs] = useState([
-    {id: "abc", name: "boobies"},
-    {id: "def", name: "yummy"},
+    "food", "yummy"
   ]);
+  const [tabIdx, setTabIdx] = useState(-1);
   const [serverID, setServerID] = useState(-1); // index of current server (-1 for dashboard)
   return (
     <>
       <header>
-        <ServerTabs tabs={tabs} onChange={(new_id) => {console.log(new_id)}}/>
+        <ServerTabs tabs={tabs} curTab={tabIdx} onChange={(new_tab) => {setTabIdx(new_tab)}}/>
       </header>
       <main>
         <ServerList onOpen={(srv) => {
-          setTabs(tabs.concat({id: srv.id, name: srv.name}))
+          setTabIdx(tabs.length);
+          setTabs(tabs.concat(srv.name))
         }}/>
         <ServerDetails/>
         <article className="mini-console">
