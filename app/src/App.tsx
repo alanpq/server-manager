@@ -74,9 +74,7 @@ function ServerConsole() {
 }
 
 function App() {
-  const [tabs, setTabs] = useState([
-    "food", "yummy"
-  ]);
+  const [tabs, setTabs]: [string[], any] = useState([]);
   const [tabIdx, setTabIdx] = useState(-1);
   const [serverID, setServerID] = useState(-1); // index of current server (-1 for dashboard)
   return (
