@@ -1,0 +1,44 @@
+.server-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto 1fr;
+
+  grid-template-areas:
+          "HEADER HEADER"
+          "LEFT RIGHT";
+
+  header {
+    grid-area: HEADER;
+    display: flex;
+
+    align-items: flex-end;
+    padding-bottom: .5em;
+    border-bottom: 1px solid #2b2f34;
+
+    h1 {
+      margin: 0 .5em 0 0;
+      padding: 0;
+    }
+
+    button {
+      margin-left: .1em;
+      padding: .5em .6em .3em .6em;
+
+      background: none;
+      border: none;
+      outline: none;
+
+      color: #797c7e;
+      cursor: pointer;
+
+      font-kerning: none;
+      font-size: 12px;
+      line-height: 14px;
+      letter-spacing: 0.12em;
+
+      &:hover {
+        color: #8f9192;
+      }
+    }
+  }
+}

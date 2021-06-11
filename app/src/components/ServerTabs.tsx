@@ -3,6 +3,8 @@ import React, {useEffect} from "react";
 
 import {Link, useHistory} from "react-router-dom";
 
+import './ServerTabs.scss';
+
 const TabLink = React.forwardRef<HTMLButtonElement, {}>((props, ref) => (
   // <a ref={ref} {...props}>💅 {props.children}</a>
   <button ref={ref} className={(props as any).className} onClick={() => {(props as any).onClick(); (props as any).navigate()}}>{props.children}</button>

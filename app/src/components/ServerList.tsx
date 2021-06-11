@@ -2,6 +2,8 @@ import {Server} from "../modals/server";
 import {useServerList} from "../websocket/connection_service";
 import React, {useState} from "react";
 
+import './ServerList.scss';
+
 export function ServerList(props: {
   onOpen?: (server: Server) => void,
   onChange?: (server_id: string) => void,

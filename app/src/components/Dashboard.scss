@@ -1,0 +1,18 @@
+main {
+  background: #222629;
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+
+  grid-template-areas:
+          "LIST DETAILS"
+          "LIST CONSOLE";
+
+  gap: 1.2em;
+  padding: 1em;
+}
+
+.mini-console {
+  grid-area: CONSOLE;
+}

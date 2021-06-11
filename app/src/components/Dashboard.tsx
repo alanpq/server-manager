@@ -4,6 +4,8 @@ import {ServerList} from "./ServerList";
 import {ServerDetails} from "./ServerDetails";
 import {ServerConsole} from "./ServerConsole";
 
+import './Dashboard.scss';
+
 export function Dashboard(props: {
   onOpen: (server: Server) => void,
   servers: { [p: string]: Server },
