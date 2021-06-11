@@ -89,29 +89,33 @@ async fn handle_connection(peer: SocketAddr, stream: TlsStream<TcpStream>, state
     // Use an unbounded channel to handle buffering and flushing of messages
     // to the websocket...
     let (tx, rx) = unbounded();
-    let name;
-    loop {
-        if let Some(Ok(msg)) = ws_stream.next().await {
-            if msg.is_text() {
-                let key: Hmac<Sha256> = Hmac::new_from_slice(JWT_KEY.as_ref()).unwrap();
-                match msg.to_text().unwrap().verify_with_key(&key) {
-                    Ok(claims) => {
-                        let claims: BTreeMap<String,Value> = claims;
-                        if let Some(s) = claims.get("sub") {
-                            if let Some(sub) = s.as_str() {
-                                name = sub.to_string();
-                                break; // TODO: check more things about this jwt
-                            }
-                        }
-                    },
-                    Err(err) => {
-                        info!("auth failed: {}", err);
-                    },
-                }
-                info!("attempted auth with {}", msg);
-            }
-        }
-    }
+    ////// TEMPORARY AUTH DISABLE PATCH :)))
+    // let name;
+    // loop {
+    //     if let Some(Ok(msg)) = ws_stream.next().await {
+    //         if msg.is_text() {
+    //             let key: Hmac<Sha256> = Hmac::new_from_slice(JWT_KEY.as_ref()).unwrap();
+    //             match msg.to_text().unwrap().verify_with_key(&key) {
+    //                 Ok(claims) => {
+    //                     let claims: BTreeMap<String,Value> = claims;
+    //                     if let Some(s) = claims.get("sub") {
+    //                         if let Some(sub) = s.as_str() {
+    //                             name = sub.to_string();
+    //                             break; // TODO: check more things about this jwt
+    //                         }
+    //                     }
+    //                 },
+    //                 Err(err) => {
+    //                     info!("auth failed: {}", err);
+    //                 },
+    //             }
+    //             info!("attempted auth with {}", msg);
+    //         }
+    //     }
+    // }
+
+    // also part of the patch:
+    let name = "asd".to_string();
 
     let (mut outgoing, incoming) = ws_stream.split();
 

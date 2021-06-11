@@ -27,8 +27,14 @@ export default class Connection {
     this.on_text = () => {};
     this.on_cmd = () => {};
 
-    this.socket = new WebSocket(`${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.hostname}:18249`);
-    this.socket.addEventListener('open', this.on_open);
+    this.socket = new WebSocket(`wss://${window.location.hostname}:18249`);
+    this.socket.addEventListener('open', () => {
+      // TODO: this should be able to retry
+      // TODO: implement auth again :)
+      // fetch(`${window.location.protocol}//${window.location.hostname}:${window.location.port}/token`)
+      //   .then(res => res.text()).then(data => this.send.call(this, data));
+      this.on_open();
+    });
     this.socket.addEventListener('close', this.on_close);
     this.socket.addEventListener('error', this.on_error);
     this.socket.addEventListener('message', (e) => {
@@ -41,19 +47,14 @@ export default class Connection {
         }).then(this.on_cmd);
       }
     });
-
-    // TODO: this should probably only happen when the connection is definitely open
-    // (also should be able to retry)
-    fetch(`${window.location.protocol}//${window.location.hostname}:${window.location.port}/token`)
-      .then(res => res.text()).then(this.send);
   }
 
-  public send_cmd(cmd: any) {
+  send_cmd(cmd: any) {
     console.log('sending cmd: ', cmd);
     this.socket.send(Uint8Array.from(btoa(JSON.stringify(cmd)), c=>c.charCodeAt(0)).buffer);
   }
 
-  public send(data: string | ArrayBufferLike | Blob | ArrayBufferView) {
+  send(data: string | ArrayBufferLike | Blob | ArrayBufferView) {
     this.socket.send(data);
   }
 }
