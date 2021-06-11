@@ -10,6 +10,11 @@ const listeners = {
 };
 
 const connection = new Connection();
+
+connection.on_open = () => {
+
+}
+
 connection.on_cmd = (cmd: any) => {
   switch (cmd.type) {
     case "Print":
@@ -27,9 +32,8 @@ connection.on_cmd = (cmd: any) => {
         out: cmd.body.out,
       } as ForeignCommand
     case "Identity":
-      return {
-        client: cmd.body
-      } as Identity
+      connection.send_cmd({type: "ListServers"});
+      break;
     case "ServerLog":
       return {
         page_no: cmd.body.page_no,
@@ -47,7 +51,7 @@ connection.on_cmd = (cmd: any) => {
   }
 }
 
-const useServerList = () => {
+export const useServerList = () => {
   const [list, setList]: [Server[], any] = useState([]);
 
   useEffect(() => {
@@ -63,12 +67,10 @@ const useServerList = () => {
   return list;
 }
 
-const useServer = (server_id: String) => {
+export const useServer = (server_id: String) => {
 
 }
 
-const useServerComms = (server_id: String) => {
+export const useServerComms = (server_id: String) => {
 
 }
-
-export {useServerComms};
