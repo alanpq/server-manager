@@ -8,7 +8,7 @@ function ServerList(props: {
   onChange?: (server_id: string) => void,
 }) {
   const list = useServerList();
-  const [current, setCurrent] = useState(0);
+  const [current, setCurrent] = useState(-1);
 
   return <ul className="server-list">
       {
@@ -17,6 +17,8 @@ function ServerList(props: {
             key={index}
             className={index === current ? 'current' : ''}
             onClick={() => {
+              if (props.onChange)
+                props.onChange(srv.id);
               setCurrent(index);
             }}
             onDoubleClick={() => {
@@ -35,7 +37,7 @@ function ServerList(props: {
 
 function ServerTabs(props: {
   tabs: string[],
-  names: {[name: string]: string},
+  servers: {[name: string]: Server},
   curTab: number,
   onChange: (new_idx: number) => void,
 }) {
@@ -47,7 +49,7 @@ function ServerTabs(props: {
           className={index === props.curTab ? 'current' : ''}
           onClick={() => {props.onChange(index)}}
           key={index}
-        >{props.names[value]}</button>
+        >{props.servers[value].name}</button>
       })
     }
     <span className="flex grow"/>
@@ -55,17 +57,25 @@ function ServerTabs(props: {
   </nav>;
 }
 
-function ServerDetails() {
-  return <article className="server-details">
-    <header>
-      <h1>CSGO Server</h1>
-      <button>EDIT</button>
-      <button>SHUTDOWN</button>
-      <button>OPEN</button>
-      <span className="flex grow"/>
-      <button>DELETE</button>
-    </header>
-  </article>;
+function ServerDetails(props: {
+  server: Server | null,
+}) {
+  if (props.server === null) {
+    return <article className="server-details">
+
+    </article>
+  } else {
+    return <article className="server-details">
+      <header>
+        <h1>{props.server.name}</h1>
+        <button>EDIT</button>
+        <button>SHUTDOWN</button>
+        <button>OPEN</button>
+        <span className="flex grow"/>
+        <button>DELETE</button>
+      </header>
+    </article>;
+  }
 }
 
 function ServerConsole() {
@@ -75,15 +85,17 @@ function ServerConsole() {
 }
 
 function App() {
-  const [serverNames, setServerNames]: [{[name: string]: string}, any] = useState({});
+  const [servers, setServers]: [{[name: string]: Server}, any] = useState({});
   const [tabs, setTabs]: [string[], any] = useState([]);
   const [tabIdx, setTabIdx] = useState(-1);
+
+  const [server, setServer]: [Server | null, any] = useState(null);
 
   const list = useServerList();
 
   useEffect(() => {
-    setServerNames((list as any).reduce((result:{[name: string]: string}, server: Server) => {
-      result[server.id] = server.name;
+    setServers((list as any).reduce((result:{[name: string]: Server}, server: Server) => {
+      result[server.id] = server;
       return result;
     }, {}));
   }, [list]);
@@ -91,19 +103,25 @@ function App() {
   return (
     <>
       <header>
-        <ServerTabs tabs={tabs} names={serverNames} curTab={tabIdx} onChange={(new_tab) => {setTabIdx(new_tab)}}/>
+        <ServerTabs tabs={tabs} servers={servers} curTab={tabIdx} onChange={(new_tab) => {setTabIdx(new_tab)}}/>
       </header>
       <main>
-        <ServerList onOpen={(srv) => {
-          const idx = tabs.indexOf(srv.id);
-          if (idx !== -1) {
-            setTabIdx(idx);
-          } else {
-            setTabIdx(tabs.length);
-            setTabs(tabs.concat(srv.id))
-          }
-        }}/>
-        <ServerDetails/>
+        <ServerList
+          onOpen={(srv) => {
+            const idx = tabs.indexOf(srv.id);
+            if (idx !== -1) {
+              setTabIdx(idx);
+            } else {
+              setTabIdx(tabs.length);
+              setTabs(tabs.concat(srv.id))
+            }
+          }}
+          onChange={(id) => {
+            setServer(servers[id]);
+            console.log(id);
+          }}
+        />
+        <ServerDetails server={server}/>
         <article className="mini-console">
           <ServerConsole />
         </article>
