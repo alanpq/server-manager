@@ -10,6 +10,9 @@ const listeners = {
 };
 
 const connection = new Connection();
+const data = {
+  serverList: [],
+};
 
 connection.on_open = () => {
 
@@ -41,6 +44,7 @@ connection.on_cmd = (cmd: any) => {
         server_id: cmd.body.server_id,
       } as ServerLog
     case "ServerList":
+      data.serverList = cmd.body;
       listeners.serverList.forEach(fn => {
         fn(cmd.body);
       });
@@ -58,6 +62,7 @@ export const useServerList = () => {
     function handleListChange(newList: Server[]) {
       setList(newList)
     }
+    setList(data.serverList);
     listeners.serverList.add(handleListChange);
     return () => {
       listeners.serverList.delete(handleListChange);

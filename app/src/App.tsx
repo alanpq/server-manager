@@ -9,7 +9,9 @@ import {ServerTabs} from "./components/ServerTabs";
 import {
   BrowserRouter as Router,
   Switch,
-  Route
+  Route,
+  useParams,
+  useHistory,
 } from "react-router-dom";
 
 function Dashboard(props: {
@@ -32,11 +34,18 @@ function Dashboard(props: {
   </main>;
 }
 
+function ServerView() {
+  const {id} = useParams<any>();
+  return <main>
+    hi :)
+    {id}
+  </main>
+}
+
 function App() {
   const [servers, setServers]: [{[name: string]: Server}, any] = useState({});
   const [tabs, setTabs]: [string[], any] = useState([]);
   const [tabIdx, setTabIdx] = useState(-1);
-
 
   const list = useServerList();
 
@@ -49,14 +58,14 @@ function App() {
 
   return (
     <>
-      <header>
-        <ServerTabs tabs={tabs} servers={servers} curTab={tabIdx} onChange={(new_tab) => {
-          setTabIdx(new_tab)
-        }}/>
-      </header>
       <Router>
+        <header>
+          <ServerTabs tabs={tabs} servers={servers} curTab={tabIdx} onChange={(new_tab) => {
+            setTabIdx(new_tab)
+          }}/>
+        </header>
         <Switch>
-          <Route path="/">
+          <Route path="/dashboard">
             <Dashboard servers={servers}
               onOpen={(srv) => {
                 const idx = tabs.indexOf(srv.id);
@@ -64,11 +73,12 @@ function App() {
                   setTabIdx(idx);
                 } else {
                   setTabIdx(tabs.length);
-                  setTabs(tabs.concat(srv.id))
+                  setTabs(tabs.concat(srv.id));
                 }
               }}
             />
           </Route>
+          <Route path="/server/:id" children={<ServerView />}/>
         </Switch>
       </Router>
     </>
