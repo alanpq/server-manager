@@ -20,6 +20,22 @@ export function ServerDetails(props: {
         <span className="flex grow"/>
         <button>DELETE</button>
       </header>
+      <section className="stats">
+        <ul>
+          <li>
+            <span>Communicator Status</span>
+            <span>{props.server.communicator}</span>
+          </li>
+          {props.server.settings &&
+              props.server.settings.map((value: any, idx: any) => {
+                return <li key={idx}>
+                <span>{value}</span>
+                <span></span>
+                </li>;
+              })
+          }
+        </ul>
+      </section>
     </article>;
   }
 }
