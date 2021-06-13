@@ -1,16 +1,25 @@
 import {Server} from "../modals/server";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {ServerList} from "./ServerList";
 import {ServerDetails} from "./ServerDetails";
 import {ServerConsole} from "./ServerConsole";
 
 import './Dashboard.scss';
+import {useServerComms} from "../websocket/connection_service";
 
 export function Dashboard(props: {
   onOpen: (server: Server) => void,
   servers: { [p: string]: Server },
 }) {
   const [server, setServer]: [Server | null, any] = useState(null);
+
+  // @ts-ignore
+  const [lines, sendCmd] = useServerComms(server?.id);
+
+  useEffect(() => {
+    console.log('lines has chhanged i know this!!');
+  }, [lines]);
+
   return <main>
     <ServerList
       onOpen={props.onOpen}
@@ -21,7 +30,7 @@ export function Dashboard(props: {
     />
     <ServerDetails server={server}/>
     <article className="mini-console">
-      <ServerConsole/>
+      <ServerConsole content={lines} onCommand={sendCmd}/>
     </article>
   </main>;
 }
