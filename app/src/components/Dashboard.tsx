@@ -17,8 +17,8 @@ export function Dashboard(props: {
   const [lines, sendCmd] = useServerComms(server?.id);
 
   useEffect(() => {
-    console.log('lines has chhanged i know this!!');
-  }, [lines]);
+    
+  }, [server]);
 
   return <main>
     <ServerList

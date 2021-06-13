@@ -50,6 +50,11 @@ connection.on_cmd = (cmd: any) => {
         data.messages[cmd.body.server] = [];
       }
       data.messages[cmd.body.server].push({
+        body: cmd.body.cmd,
+        msg_type: MessageType.IN,
+        timestamp: Date.now(), // TODO: make this not bad
+      });
+      data.messages[cmd.body.server].push({
         body: cmd.body.out,
         msg_type: MessageType.OUT,
         timestamp: Date.now(), // TODO: make this not bad
