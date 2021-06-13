@@ -3,11 +3,15 @@ import React from "react";
 import './ServerConsole.scss'
 import {Message} from "../modals/message";
 
+const formatTimestamp = (timestamp: Date) => {
+  return `${("0"+timestamp.getHours()).slice(-2)}:${("0"+timestamp.getMinutes()).slice(-2)}:${("0"+timestamp.getSeconds()).slice(-2)}`
+}
+
 function Line(props: {
   msg: Message
 }) {
   return <li>
-    <span className={`timestamp ${props.msg.msg_type}`}>{props.msg.timestamp}</span>
+    <span className={`timestamp ${props.msg.msg_type}`}>{formatTimestamp(new Date(props.msg.timestamp))}</span>
     <span className="body">{props.msg.body}</span>
   </li>
 }
