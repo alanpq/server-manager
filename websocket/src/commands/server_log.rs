@@ -5,7 +5,7 @@ use crate::server;
 use tungstenite::Message;
 use uuid::Uuid;
 
-pub async fn server_log(state: &RwLock<State>, client_id: &Uuid, page_no: &Option<usize>) -> Option<Message> {
+pub async fn server_log(state: &RwLock<State>, client_id: &Uuid, page_no: &Option<usize>) -> Option<Vec<Message>> {
     // messages are grouped in pages of some size
     // these pages are numbered in ascending order of timestamp
     let state = state.read().await;

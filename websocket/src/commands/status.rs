@@ -3,7 +3,7 @@ use tokio::sync::RwLock;
 use crate::state::State;
 use tungstenite::Message;
 
-pub async fn status(state: &RwLock<State>, client_id: &Uuid, id: &Option<Uuid>) -> Option<Message> {
+pub async fn status(state: &RwLock<State>, client_id: &Uuid, id: &Option<Uuid>) -> Option<Vec<Message>> {
     if id.is_none() {
         return None;
     }

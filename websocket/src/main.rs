@@ -168,13 +168,16 @@ async fn handle_connection(peer: SocketAddr, stream: TlsStream<TcpStream>, state
                     Ok(cmd) => {
                         if let Some(resp) = process_command(cmd, &client.uuid, state.as_ref()).await {
                             // commands can return tungstenite::Message's to send back to the client
-                            tx.lock().await.unbounded_send(resp).unwrap();
+                            for msg in resp {
+                                tx.lock().await.unbounded_send(msg).unwrap();
+                            }
                         }
                     },
                     Err(err) => {
-                        tx.lock().await.unbounded_send(Message::from(encode_cmd(
-                            &ServerCommand::Print("Unknown command".to_string())
-                        ))).unwrap();
+                        // TODO: command for printing to client when no server is known
+                        // tx.lock().await.unbounded_send(Message::from(encode_cmd(
+                        //     &ServerCommand::Print("Unknown command".to_string())
+                        // ))).unwrap();
                         warn!("Could not resolve ClientCommand:");
                         warn!("{:?}", err);
                         match serde_json::from_str::<Value>(json_str) {

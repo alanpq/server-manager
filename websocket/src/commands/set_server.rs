@@ -6,7 +6,7 @@ use tungstenite::Message;
 use crate::encode_cmd;
 use crate::commands::ServerCommand;
 
-pub async fn set_server(state: &RwLock<State>, client_id: &Uuid, id: &Uuid) -> Option<Message> {
+pub async fn set_server(state: &RwLock<State>, client_id: &Uuid, id: &Uuid) -> Option<Vec<Message>> {
     let mut state = state.write().await;
     match state.servers.get(id) {
         Some(_) => {
@@ -19,9 +19,9 @@ pub async fn set_server(state: &RwLock<State>, client_id: &Uuid, id: &Uuid) -> O
         },
         None => {
             debug!("could not find server id {}", id);
-            return Some(Message::from(encode_cmd(
-                &ServerCommand::Print("Server not found.".to_string())
-            )))
+            // return Some(Message::from(encode_cmd(
+            //     &ServerCommand::Print("Server not found.".to_string())
+            // )))
         }
     }
     None

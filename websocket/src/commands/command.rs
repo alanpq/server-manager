@@ -6,7 +6,7 @@ use crate::state::State;
 use tungstenite::Message;
 use crate::encode_cmd;
 
-pub async fn command(state: &RwLock<State>, client_id: &Uuid, id: &Uuid, cmd: &String) -> Option<Message> {
+pub async fn command(state: &RwLock<State>, client_id: &Uuid, id: &Uuid, cmd: &String) -> Option<Vec<Message>> {
     // TODO: use timestamp from when the res is actually generated, not when client receives it
     debug!("received command for {} -> '{}'", id, cmd);
     let mut state = state.write().await;
@@ -19,17 +19,15 @@ pub async fn command(state: &RwLock<State>, client_id: &Uuid, id: &Uuid, cmd: &S
     debug!("server found: {:?}", server.info());
 
     let res = server.send_cmd(cmd.clone()).await;
+    let mut tx_msgs = Vec::new();
     for other in state.clients.values() {
-        if other.uuid == *client_id {
-            continue;
-        }
         debug!("sending to {}...", other.uuid);
-        return Some(Message::from(encode_cmd(&ServerCommand::ForeignCommand{
-            id: *client_id,
+        tx_msgs.push(Message::from(encode_cmd(&ServerCommand::Command{
+            user: *client_id,
+            server: *id,
             cmd: cmd.clone(),
             out: res.clone()
         })));
-
     }
-    Some(Message::from(res))
+    return Some(tx_msgs);
 }

@@ -31,7 +31,7 @@ use futures::channel::mpsc::UnboundedSender;
 pub enum ServerCommand {
   Status(ServerInfo),
   Print(String),
-  ForeignCommand{id: Uuid, cmd: String, out: String},
+  Command{user: Uuid, server: Uuid, cmd: String, out: String},
   Identity(Client),
 
   ServerLog{page_no: usize, messages: Vec<Message>, server_id: Uuid},
@@ -55,7 +55,7 @@ pub enum ClientCommand {
   ListServers,
 }
 
-pub async fn process_command(cmd: ClientCommand, client_id: &Uuid, state: &RwLock<State>) -> Option<tungstenite::Message>{
+pub async fn process_command(cmd: ClientCommand, client_id: &Uuid, state: &RwLock<State>) -> Option<Vec<tungstenite::Message>>{
   match cmd {
     ClientCommand::Command{id, cmd} => command(state, client_id, &id, &cmd).await,
     ClientCommand::Status(id) => status(state, client_id, &id).await,
