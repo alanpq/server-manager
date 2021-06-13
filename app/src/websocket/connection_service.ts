@@ -61,8 +61,6 @@ connection.on_cmd = (cmd: any) => {
         msg_type: MessageType.OUT,
         timestamp: Date.now(), // TODO: make this not bad
       });
-      console.log('uwu');
-      console.log(listeners);
       broadcastListeners(listeners.serverComm[cmd.body.server], data.messages[cmd.body.server]);
       break;
     case "Identity":
@@ -125,18 +123,12 @@ export const useServerComms = (server_id: string | undefined): [Message[], (cmd:
   const [lines, setLines] = useState<Message[]>([]);
 
   useEffect(() => {
-    console.log('blasrgh');
-  }, [lines]);
-
-  useEffect(() => {
     function handleIn(newLines: Message[]) {
-      console.log('handled in');
       setLines(newLines.slice());
     }
     if (server_id === undefined) {
         return () => {};
     } else {
-      console.log('not undefined!!');
       if (listeners.serverComm[server_id] === undefined)
         listeners.serverComm[server_id] = new Set();
       listeners.serverComm[server_id].add(handleIn);
@@ -150,7 +142,6 @@ export const useServerComms = (server_id: string | undefined): [Message[], (cmd:
     return [lines, ()=>{}];
   } else {
     return [lines, (cmd: string) => {
-      console.log('hello');
       connection.send_cmd({
         type: "Command",
         body: {
