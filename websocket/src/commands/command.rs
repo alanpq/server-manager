@@ -18,7 +18,7 @@ pub async fn command(state: &RwLock<State>, client_id: &Uuid, id: &Uuid, cmd: &S
     let server = server.unwrap();
     debug!("server found: {:?}", server.info());
 
-    let res = server.send_cmd(cmd.clone()).await;
+    let res = server.send_cmd(client_id, cmd.clone()).await;
     let mut tx_msgs = Vec::new();
     for other in state.clients.values() {
         debug!("sending to {}...", other.uuid);

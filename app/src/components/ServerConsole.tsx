@@ -7,12 +7,34 @@ const formatTimestamp = (timestamp: Date) => {
   return `${("0"+timestamp.getHours()).slice(-2)}:${("0"+timestamp.getMinutes()).slice(-2)}:${("0"+timestamp.getSeconds()).slice(-2)}`
 }
 
+const hashCode = (str: string) => { // java String#hashCode
+  var hash = 0;
+  for (var i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return hash;
+}
+
+const intToRGB = (i: number) => {
+  var c = (i & 0x00FFFFFF)
+    .toString(16)
+    .toUpperCase();
+
+  return "00000".substring(0, 6 - c.length) + c;
+}
+
+const getColor = (user: string) => {
+  return intToRGB(hashCode(user));
+}
+
 function Line(props: {
   msg: Message
 }) {
   return <li>
     <span className={`timestamp ${props.msg.msg_type}`}>{formatTimestamp(new Date(props.msg.timestamp))}</span>
-    <span className="body">{props.msg.body}</span>
+    <span className="body" style={{
+      backgroundColor: `#${getColor(props.msg.user)}22`,
+    }} title={props.msg.user ?? ""}>{props.msg.body}</span>
   </li>
 }
 

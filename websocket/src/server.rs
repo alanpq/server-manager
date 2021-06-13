@@ -41,14 +41,16 @@ pub enum MessageType {
 #[derive(Clone)]
 pub struct Message {
   pub timestamp: i64,
+  pub user: Uuid,
   pub body: String,
   pub msg_type: MessageType,
 }
 
 impl Message {
-  pub fn new(body: String, msg_type: MessageType) -> Message {
+  pub fn new(user: Uuid, body: String, msg_type: MessageType) -> Message {
     Message {
       timestamp: Utc::now().timestamp(),
+      user,
       body,
       msg_type,
     }
@@ -106,17 +108,17 @@ impl Server {
     return &self.id;
   } 
 
-  pub async fn send_cmd(&mut self, cmd: String) -> String {
-    self.messages.push(Message::new(cmd.clone(), MessageType::IN));
+  pub async fn send_cmd(&mut self, user: &Uuid, cmd: String) -> String {
+    self.messages.push(Message::new(*user,cmd.clone(), MessageType::IN));
     match self.communicator.as_mut() {
       Some(communicator) => {
         let r = communicator.send_cmd(cmd).await;
-        self.messages.push(Message::new(r.clone(), MessageType::OUT));
+        self.messages.push(Message::new(*user, r.clone(), MessageType::OUT));
         r
       },
       None => {
         let s = "No communicator has been set up!".to_string();
-        self.messages.push(Message::new(s.clone(), MessageType::OUT));
+        self.messages.push(Message::new(*user, s.clone(), MessageType::OUT));
         s
       }
     }
