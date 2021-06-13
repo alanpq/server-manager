@@ -5,7 +5,7 @@ import {ServerDetails} from "./ServerDetails";
 import {ServerConsole} from "./ServerConsole";
 
 import './Dashboard.scss';
-import {useServerComms} from "../websocket/connection_service";
+import {fetchServer, useServerComms} from "../websocket/connection_service";
 
 export function Dashboard(props: {
   onOpen: (server: Server) => void,
@@ -17,7 +17,8 @@ export function Dashboard(props: {
   const [lines, sendCmd] = useServerComms(server?.id);
 
   useEffect(() => {
-    
+    // @ts-ignore
+    fetchServer(server?.id);
   }, [server]);
 
   return <main>

@@ -47,7 +47,7 @@ pub enum ClientCommand {
   Status(Option<Uuid>), // get status of server
 
   SetServer(Uuid), // set client's current server id
-  ServerLog(Option<usize>), // get page of server log (if no page specified, return last page)
+  ServerLog{id: Uuid, page_no: Option<usize>}, // get page of server log (if no page specified, return last page)
 
   CreateServer,
   UpdateServer{id: Uuid, name: Option<String>, communicator_type: Option<CommunicatorType>},
@@ -61,7 +61,7 @@ pub async fn process_command(cmd: ClientCommand, client_id: &Uuid, state: &RwLoc
     ClientCommand::Status(id) => status(state, client_id, &id).await,
 
     ClientCommand::SetServer(id) => set_server(state, client_id, &id).await,
-    ClientCommand::ServerLog(page_no) => server_log(state, client_id, &page_no).await,
+    ClientCommand::ServerLog{id, page_no} => server_log(state, client_id, &id, &page_no).await,
 
     ClientCommand::CreateServer => create_server(state, client_id).await,
     ClientCommand::UpdateServer {

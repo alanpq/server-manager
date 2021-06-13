@@ -68,6 +68,7 @@ connection.on_cmd = (cmd: any) => {
       break;
     case "ServerLog":
       data.messages[cmd.body.server_id] = cmd.body.messages; // TODO: handle different pages
+      broadcastListeners(listeners.serverComm[cmd.body.server_id], data.messages[cmd.body.server_id]);
       break;
     case "ServerList":
       data.serverList = cmd.body;
@@ -77,6 +78,24 @@ connection.on_cmd = (cmd: any) => {
       console.error(`Failed to parse command of type ${cmd.type} -> ${cmd.body}'`);
       break;
   }
+}
+
+/**
+ * Fetches new information on specified server.
+ * @param server_id UUID of the server
+ */
+export const fetchServer = (server_id: string | undefined) => {
+  if (server_id === undefined) return;
+  connection.send_cmd({
+    type: "Status",
+    body: server_id,
+  });
+  connection.send_cmd({
+    type: "ServerLog",
+    body: {
+      id: server_id
+    },
+  });
 }
 
 export const useServerList = () => {
