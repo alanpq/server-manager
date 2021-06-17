@@ -32,7 +32,7 @@ pub enum ServerCommand {
   Status(ServerInfo),
   Print(String),
   Command{user: Uuid, server: Uuid, cmd: String, out: String},
-  Identity(Client),
+  Identity{client: Client, communicator_types: Vec<String>},
 
   ServerLog{page_no: usize, messages: Vec<Message>, server_id: Uuid},
 

@@ -9,7 +9,10 @@ use serde::{Serialize, Deserialize};
 #[derive(Debug)]
 #[derive(Serialize, Deserialize)]
 #[derive(Clone, Copy)]
+#[derive(EnumVariantNames)]
+#[strum(serialize_all = "PascalCase")]
 pub enum CommunicatorType {
   None,
+  #[strum(serialize="CSGO")]
   CSGO,
 }

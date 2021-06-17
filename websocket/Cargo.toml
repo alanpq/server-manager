@@ -29,6 +29,8 @@ futures-channel = "0.3.14"
 lazy_static = "1.4.0"
 async-trait = "0.1.50"
 
+strum = { version = "0.21", features = ["derive"] }
+
 uuid = { version = "0.8", features = ["v4", "serde"] } # uuid's fit well in this context.
 jwt = "0.14.0"
 hmac = "0.11.0"

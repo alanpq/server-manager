@@ -22,6 +22,9 @@ use std::sync::atomic::{Ordering};
 #[macro_use]
 extern crate lazy_static;
 
+#[macro_use]
+extern crate strum;
+
 use rand::random;
 
 use futures_util::{future, pin_mut, stream::TryStreamExt, SinkExt, StreamExt, Stream};
@@ -52,7 +55,9 @@ use crate::commands::ServerCommand::Identity;
 
 use std::path::PathBuf;
 use tokio_rustls::server::TlsStream;
+use crate::communicators::CommunicatorType;
 
+use strum::VariantNames;
 fn load_certs(path: &Path) -> io::Result<Vec<Certificate>> {
     certs(&mut BufReader::new(File::open(path)?))
         .map_err(|_| io::Error::new(io::ErrorKind::InvalidInput, "invalid cert"))
@@ -131,7 +136,10 @@ async fn handle_connection(peer: SocketAddr, stream: TlsStream<TcpStream>, state
     state.read().await.count.fetch_add(1, Ordering::Relaxed);
 
     outgoing.send(Message::from(encode_cmd(
-        &ServerCommand::Identity(client.clone())
+        &ServerCommand::Identity {
+            client: client.clone(),
+            communicator_types: Vec::from(CommunicatorType::VARIANTS).iter().map(ToString::to_string).collect(), // TODO: cache this
+        }
     ))).await?;
 
     // TODO: bring back client join broadcasts

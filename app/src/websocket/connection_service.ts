@@ -18,10 +18,12 @@ const listeners: {
 
 const connection = new Connection();
 const data: {
+  communicator_types: string[],
   serverList: any[],
   servers: {[server_id: string]: Server},
   messages: {[server_id: string]: Message[]},
 } = {
+  communicator_types: [],
   serverList: [],
   servers: {},
   messages: {},
@@ -90,6 +92,7 @@ connection.on_cmd = (cmd: any) => {
       break;
     case "Identity":
       connection.send_cmd({type: "ListServers"});
+      data.communicator_types = cmd.body.communicator_types;
       break;
     case "ServerLog":
       data.messages[cmd.body.server_id] = cmd.body.messages; // TODO: handle different pages
@@ -188,4 +191,8 @@ export const useServerComms = (server_id: string | undefined): [Message[], (cmd:
       });
     }];
   }
+}
+
+export const useCommTypes = () => {
+  return data.communicator_types;
 }
