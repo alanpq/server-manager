@@ -50,11 +50,20 @@ export default class Connection {
   }
 
   send_cmd(cmd: any) {
+    if(this.socket.readyState !== 1) {
+      // FIXME: queue these commands
+      console.warn("socket not ready to send messages.");
+      return;
+    }
     console.log('sending cmd: ', cmd);
     this.socket.send(Uint8Array.from(btoa(JSON.stringify(cmd)), c=>c.charCodeAt(0)).buffer);
   }
 
   send(data: string | ArrayBufferLike | Blob | ArrayBufferView) {
+    if(this.socket.readyState !== 1) {
+      console.warn("socket not ready to send messages.");
+      return;
+    }
     this.socket.send(data);
   }
 }
