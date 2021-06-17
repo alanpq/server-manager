@@ -84,6 +84,8 @@
     input, select {
       @include minimal-input;
 
+      width: 100%;
+
       &::placeholder {
         font-style: italic;
         font-family: 'Ubuntu', sans-serif;
