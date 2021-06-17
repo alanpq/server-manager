@@ -20,7 +20,7 @@ export function Dashboard(props: {
   //   // @ts-ignore
   // }, [server]);
 
-  return <main>
+  return <main className="dashboard">
     <ServerList
       onOpen={props.onOpen}
       onChange={(id) => {

@@ -177,6 +177,7 @@ export const useServerComms = (server_id: string | undefined): [Message[], (cmd:
     return [lines, ()=>{}];
   } else {
     return [lines, (cmd: string) => {
+      if(cmd === "") return;
       connection.send_cmd({
         type: "Command",
         body: {
