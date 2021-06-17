@@ -4,6 +4,8 @@ import React, {useEffect} from "react";
 import {Link, useHistory} from "react-router-dom";
 
 import './ServerTabs.scss';
+import user from '../svg/user.svg';
+import {UserIcon} from "../svg/UserIcon";
 
 const TabLink = React.forwardRef<HTMLButtonElement, {}>((props, ref) => (
   // <a ref={ref} {...props}>💅 {props.children}</a>
@@ -21,7 +23,7 @@ export function ServerTabs(props: {
     if(props.curTab !== -1)
       history.push("/server/" + props.tabs[props.curTab]);
   }, [props.curTab]);
-  return <nav>
+  return <nav className="server-tabs">
     <Link to={`/dashboard`} component={TabLink}
       className={props.curTab === -1 ? 'current' : ''}
       onClick={() => {props.onChange(-1);}}
@@ -35,6 +37,9 @@ export function ServerTabs(props: {
       })
     }
     <span className="flex grow"/>
-    <button className="user">Username</button>
+    <button className="user">
+      Username
+      <UserIcon />
+    </button>
   </nav>;
 }

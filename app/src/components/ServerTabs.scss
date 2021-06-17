@@ -1,0 +1,60 @@
+@use "../App";
+nav.server-tabs {
+  display: flex;
+  flex-direction: row;
+  margin: 0;
+  padding: 0 0 0 App.$nav_height;
+
+  height: 100%;
+
+  .user {
+    background: none;
+    color: #7b7d7f;
+
+    text-align: right;
+
+    outline: none;
+    border: none;
+
+    width: min-content;
+    margin: 0;
+    padding: .75em;
+
+    display: flex;
+    justify-items: center;
+    align-items: center;
+
+    transition: color 0.1s ease-in-out;
+
+    svg {
+      height: 1em;
+      margin-left: .5em;
+    }
+    &:hover {
+      color: #eeeeee;
+    }
+  }
+
+
+  button {
+    width: 150px;
+    margin-right: 1px;
+    height: 100%;
+
+    outline: none;
+    border: none;
+    color: #7b7d7f;
+    background: #1e2224;
+
+    cursor: pointer;
+
+    &:hover {
+      background: #32383b;
+    }
+
+    &.current {
+      background: #222629;
+      cursor: default;
+    }
+  }
+}
