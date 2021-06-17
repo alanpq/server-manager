@@ -65,7 +65,6 @@ connection.on_cmd = (cmd: any) => {
       // TODO: handle Print commands
       break;
     case "Status":
-      console.log(cmd.body)
       data.servers[cmd.body.id] = parseServer(cmd.body);
       listeners.server_once[cmd.body.id]?.forEach((cb) => {
         cb(data.servers[cmd.body.id]);
@@ -73,8 +72,6 @@ connection.on_cmd = (cmd: any) => {
       listeners.server_once[cmd.body.id] = new Set();
       broadcastListeners(listeners.server[cmd.body.id], data.servers[cmd.body.id]);
       broadcastListeners(listeners.serverList, Object.values(data.servers));
-
-      console.log(cmd.body);
       break;
     case "Command":
       if(data.messages[cmd.body.server] === undefined) {
