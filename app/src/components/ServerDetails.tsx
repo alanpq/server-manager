@@ -68,10 +68,12 @@ export function ServerDetails(props: {
               <span>{v.name}</span>
               <input
                 type={v.type}
-                defaultValue={v.value}
+                name={v.name}
+                value={data[v.name]}
                 placeholder={
                   !v.value ? (v.type === "password" ? "hidden" : "empty") : ""
                 }
+                onChange={_handleInput}
               />
             </li>;
           })
