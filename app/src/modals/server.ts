@@ -10,6 +10,7 @@ export interface Server {
   id: string,
   name: string,
   communicator: CommunicatorStatus,
+  comm_type: string,
   settings: ServerSettings[],
   clients: any,
 }

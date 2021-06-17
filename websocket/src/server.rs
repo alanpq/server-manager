@@ -24,7 +24,8 @@ pub enum CommunicatorStatus {
 pub struct ServerInfo { 
   pub id: Uuid,
   pub name: String,
-  pub communicator: CommunicatorStatus,
+  pub communicator: CommunicatorStatus, // TODO: rename this to comm_status
+  pub comm_type: CommunicatorType,
   pub settings: Value,
   pub clients: Value,
 }
@@ -77,6 +78,7 @@ impl Server {
         id, 
         name,
         communicator: CommunicatorStatus::DISCONNECTED,
+        comm_type: CommunicatorType::None,
         settings: Value::Null,
         clients: Value::Null,
       },
@@ -91,6 +93,9 @@ impl Server {
     match communicator {
       Some(communicator) => {
         match communicator {
+          CommunicatorType::None => {
+            Server::new(name, None)
+          },
           CommunicatorType::CSGO => {
             Server::new(name, Some(Box::new(CSGORcon::new())))
           },
@@ -154,7 +159,11 @@ impl Server {
   }
   
   pub fn info(&self) -> ServerInfo {
-    return self.info.clone();
+    let mut info = self.info.clone();
+    if let Some(comm) = self.communicator.as_ref() {
+      info.comm_type = comm.comm_type();
+    }
+    return info;
   }
 
   pub fn get_settings(&self) -> Value {

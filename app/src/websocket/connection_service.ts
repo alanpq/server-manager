@@ -51,6 +51,7 @@ connection.on_cmd = (cmd: any) => {
       data.servers[cmd.body.id] = {
         id: cmd.body.id,
         name: cmd.body.name,
+        comm_type: cmd.body.comm_type,
         communicator: cmd.body.communicator,
         settings: Object.entries(cmd.body.settings ?? {}).map(([key, value]: [string, any]) => {
           const spl = key.split('/');

@@ -72,7 +72,7 @@ export function ServerList(props: {
         >
           <span title={srv.id}>{srv.name}</span>
           <span>{srv.communicator}</span>
-          <span>HI</span>
+          <span>{srv.comm_type}</span>
         </li>
       })
     }

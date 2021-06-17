@@ -4,6 +4,7 @@ use rcon::Connection;
 use serde::Serialize;
 use serde_json::{Value, json};
 use log::*;
+use crate::communicators::CommunicatorType;
 
 #[derive(Serialize)]
 pub struct CSGORcon {
@@ -29,6 +30,10 @@ impl Communicator for CSGORcon {
       return self.conn.as_mut().unwrap().cmd(cmd.as_str()).await.unwrap();
     }
     return "Not connected to server.".to_string()
+  }
+
+  fn comm_type(&self) -> CommunicatorType {
+    CommunicatorType::CSGO
   }
 
   async fn connect(&mut self, address: &str, password: &str) -> Result<(), rcon::Error> {
