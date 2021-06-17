@@ -20,7 +20,7 @@ pub enum CommunicatorType {
   CSGO,
 }
 
-pub fn generate_communicator(comm_type: CommunicatorType) -> Option<BoxedCommunicator> {
+pub fn generate_communicator(comm_type: &CommunicatorType) -> Option<BoxedCommunicator> {
   match comm_type {
     CommunicatorType::None => {
       None

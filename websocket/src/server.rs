@@ -88,10 +88,14 @@ impl Server {
     }
   }
 
-  pub fn set_communicator(&mut self, comm_type: CommunicatorType) {
+  pub fn set_communicator(&mut self, comm_type: &CommunicatorType) {
     self.communicator = generate_communicator(comm_type);
     self.info.communicator = CommunicatorStatus::DISCONNECTED;
-    self.info.comm_type = comm_type;
+    self.info.comm_type = *comm_type;
+  }
+
+  pub fn set_name(&mut self, name: &String) {
+    self.info.name = name.clone();
   }
 
   pub fn id(&self) -> &Uuid {
