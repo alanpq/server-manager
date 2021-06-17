@@ -42,9 +42,55 @@
     }
   }
 
+  .settings {
+    grid-area: LEFT;
+
+    input {
+      margin: 0;
+      padding: 0.1em 0.25em;
+
+      color: rgba(136, 138, 139, 0.5);
+      background: none;
+      outline: 0;
+      border: 0;
+
+      transition: background-color 0.1s ease-in-out,
+                  color 0.1s ease-in-out;
+
+      cursor: pointer;
+      &:hover {
+        background: rgba(0,0,0,0.2);
+      }
+
+      &:focus {
+        color: #888A8B;
+        background: rgba(0,0,0,0.3);
+        &::placeholder {
+          opacity: 0;
+        }
+      }
+
+      &::placeholder {
+        font-style: italic;
+        font-family: 'Ubuntu', sans-serif;
+        font-size: 12px;
+        opacity: 1;
+      }
+    }
+  }
+
   .stats {
     grid-area: RIGHT;
     border-left: 1px solid #2E3338;
+
+    li {
+      & *:last-child {
+        text-align: right;
+      }
+    }
+  }
+
+  .stats, .settings {
     margin: 1em 0;
     padding: 1em 1em;
     ul {
@@ -62,11 +108,9 @@
         display: grid;
         grid-column: 1/3;
         grid-template-columns: subgrid;
-        & *:last-child {
-          text-align: right;
-        }
+
+        align-items: center;
       }
     }
   }
-
 }

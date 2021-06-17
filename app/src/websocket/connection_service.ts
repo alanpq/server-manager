@@ -7,19 +7,23 @@ import {Message, MessageType} from "../modals/message";
 const listeners: {
   serverList: Set<any>,
   server: Set<any>,
+  server_once: {[server_id: string]: Set<any>},
   serverComm: {[server_id: string]: Set<any>},
 } = {
   serverList: new Set<any>(),
   server: new Set<any>(),
+  server_once: {},
   serverComm: {},
 };
 
 const connection = new Connection();
 const data: {
   serverList: any[],
+  servers: {[server_id: string]: Server},
   messages: {[server_id: string]: Message[]},
 } = {
   serverList: [],
+  servers: {},
   messages: {},
 };
 
@@ -43,7 +47,27 @@ connection.on_cmd = (cmd: any) => {
       // TODO: handle Print commands
       break;
     case "Status":
-      // TODO: handle Status commands
+      console.log(cmd.body)
+      data.servers[cmd.body.id] = {
+        id: cmd.body.id,
+        name: cmd.body.name,
+        communicator: cmd.body.communicator,
+        settings: Object.entries(cmd.body.settings).map(([key, value]: [string, any]) => {
+          const spl = key.split('/');
+          return {
+            type: spl[0],
+            name: spl[1],
+            value,
+          }
+        }),
+        clients: cmd.body.clients,
+      }
+      listeners.server_once[cmd.body.id]?.forEach((cb) => {
+        cb(data.servers[cmd.body.id]);
+      });
+      listeners.server_once[cmd.body.id] = new Set();
+
+      console.log(cmd.body);
       break;
     case "Command":
       if(data.messages[cmd.body.server] === undefined) {
@@ -82,9 +106,10 @@ connection.on_cmd = (cmd: any) => {
 
 /**
  * Fetches new information on specified server.
- * @param server_id UUID of the server
+ * @param server_id UUID of the server.
+ * @param cb Callback for when server fetch completes.
  */
-export const fetchServer = (server_id: string | undefined) => {
+export const fetchServer = (server_id: string | undefined, cb: (server: Server) => void) => {
   if (server_id === undefined) return;
   connection.send_cmd({
     type: "Status",
@@ -96,6 +121,10 @@ export const fetchServer = (server_id: string | undefined) => {
       id: server_id
     },
   });
+  if (!listeners.server_once[server_id]) {
+    listeners.server_once[server_id] = new Set();
+  }
+  listeners.server_once[server_id].add(cb);
 }
 
 export const useServerList = () => {

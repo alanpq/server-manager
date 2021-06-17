@@ -16,10 +16,9 @@ export function Dashboard(props: {
   // @ts-ignore
   const [lines, sendCmd] = useServerComms(server?.id);
 
-  useEffect(() => {
-    // @ts-ignore
-    fetchServer(server?.id);
-  }, [server]);
+  // useEffect(() => {
+  //   // @ts-ignore
+  // }, [server]);
 
   return <main>
     <ServerList
@@ -27,6 +26,7 @@ export function Dashboard(props: {
       onChange={(id) => {
         setServer(props.servers[id]);
         console.log(id);
+        fetchServer(id, setServer);
       }}
     />
     <ServerDetails server={server}/>
