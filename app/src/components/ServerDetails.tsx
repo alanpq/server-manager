@@ -6,16 +6,17 @@ import {useCommTypes} from "../websocket/connection_service";
 
 export function ServerDetails(props: {
   server: Server | null,
+  onEdit: (value: any) => void,
 }) {
   const commTypes = useCommTypes();
   if (props.server === null) {
     return <article className="server-details">
-      <p>Select a server from the list.</p>
     </article>
   } else {
     return <article className="server-details">
       <header>
-        <input value={props.server.name}/>
+        {/*FIXME: debounce all of these inputs*/}
+        <input value={props.server.name} onChange={(e) => {props.onEdit({name: e.currentTarget.value});}} />
         <button>EDIT</button>
         <button>SHUTDOWN</button>
         <button>OPEN</button>

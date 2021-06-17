@@ -56,6 +56,12 @@ impl Communicator for CSGORcon {
   }
 
   fn update_settings(&mut self, new: Value) -> Result<(), Box<dyn std::error::Error>> {
-      Ok(()) // TODO: implement me
+    if let Some(obj) = new.as_object() {
+      if let Some(pwd) = obj.get("password") {
+        self.password = pwd.to_string();
+      }
+    }
+
+    Ok(())
   }
 }

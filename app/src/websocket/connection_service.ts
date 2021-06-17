@@ -6,12 +6,12 @@ import {Message, MessageType} from "../modals/message";
 
 const listeners: {
   serverList: Set<any>,
-  server: Set<any>,
+  server: {[server_id: string]: Set<any>},
   server_once: {[server_id: string]: Set<any>},
   serverComm: {[server_id: string]: Set<any>},
 } = {
   serverList: new Set<any>(),
-  server: new Set<any>(),
+  server: {},
   server_once: {},
   serverComm: {},
 };
@@ -19,7 +19,7 @@ const listeners: {
 const connection = new Connection();
 const data: {
   communicator_types: string[],
-  serverList: any[],
+  serverList: Server[],
   servers: {[server_id: string]: Server},
   messages: {[server_id: string]: Message[]},
 } = {
@@ -43,6 +43,24 @@ connection.on_open = () => {
 
 }
 
+const parseServer = (raw: any): Server => {
+  return {
+    id: raw.id,
+      name: raw.name,
+    comm_type: raw.comm_type,
+    communicator: raw.communicator,
+    settings: Object.entries(raw.settings ?? {}).map(([key, value]: [string, any]) => {
+    const spl = key.split('/');
+    return {
+      type: spl[0],
+      name: spl[1],
+      value,
+    }
+  }),
+    clients: raw.clients,
+  }
+}
+
 connection.on_cmd = (cmd: any) => {
   switch (cmd.type) {
     case "Print":
@@ -50,25 +68,13 @@ connection.on_cmd = (cmd: any) => {
       break;
     case "Status":
       console.log(cmd.body)
-      data.servers[cmd.body.id] = {
-        id: cmd.body.id,
-        name: cmd.body.name,
-        comm_type: cmd.body.comm_type,
-        communicator: cmd.body.communicator,
-        settings: Object.entries(cmd.body.settings ?? {}).map(([key, value]: [string, any]) => {
-          const spl = key.split('/');
-          return {
-            type: spl[0],
-            name: spl[1],
-            value,
-          }
-        }),
-        clients: cmd.body.clients,
-      }
+      data.servers[cmd.body.id] = parseServer(cmd.body);
       listeners.server_once[cmd.body.id]?.forEach((cb) => {
         cb(data.servers[cmd.body.id]);
       });
       listeners.server_once[cmd.body.id] = new Set();
+      broadcastListeners(listeners.server[cmd.body.id], data.servers[cmd.body.id]);
+      broadcastListeners(listeners.serverList, Object.values(data.servers));
 
       console.log(cmd.body);
       break;
@@ -99,8 +105,12 @@ connection.on_cmd = (cmd: any) => {
       broadcastListeners(listeners.serverComm[cmd.body.server_id], data.messages[cmd.body.server_id]);
       break;
     case "ServerList":
-      data.serverList = cmd.body;
-      broadcastListeners(listeners.serverList, cmd.body);
+      cmd.body.map((value: any) => {
+        return parseServer(value);
+      }).forEach((srv: Server) => {
+        data.servers[srv.id] = srv;
+      });
+      broadcastListeners(listeners.serverList, Object.values(data.servers));
       break;
     default:
       console.error(`Failed to parse command of type ${cmd.type} -> ${cmd.body}'`);
@@ -119,7 +129,7 @@ export const createServer = () => {
  * @param server_id UUID of the server.
  * @param cb Callback for when server fetch completes.
  */
-export const fetchServer = (server_id: string | undefined, cb: (server: Server) => void) => {
+export const fetchServer = (server_id: string | undefined) => {
   if (server_id === undefined) return;
   connection.send_cmd({
     type: "Status",
@@ -131,10 +141,6 @@ export const fetchServer = (server_id: string | undefined, cb: (server: Server) 
       id: server_id
     },
   });
-  if (!listeners.server_once[server_id]) {
-    listeners.server_once[server_id] = new Set();
-  }
-  listeners.server_once[server_id].add(cb);
 }
 
 export const useServerList = () => {
@@ -154,8 +160,55 @@ export const useServerList = () => {
   return list;
 }
 
-export const useServer = (server_id: string) => {
+const registerServerListener = (server_id: string, cb: (server: Server) => void, once?: boolean) => {
+  if (once ?? false) {
+    if(listeners.server_once[server_id] === undefined)
+      listeners.server_once[server_id] = new Set();
+    listeners.server_once[server_id].add(cb);
+  } else {
+    if(listeners.server[server_id] === undefined)
+      listeners.server[server_id] = new Set();
+    listeners.server[server_id].add(cb);
+  }
+}
 
+const unregisterServerListener = (server_id: string, cb: (server: Server) => void, once?: boolean) => {
+  if (once ?? false)
+    listeners.server_once[server_id].delete(cb);
+  else
+    listeners.server[server_id].delete(cb);
+}
+
+export const useServer = (server_id: string | undefined): [Server | null, (srv: Server) => void] => {
+  const [server, setServer] = useState<Server | null>(null);
+  useEffect(() => {
+    function updateServer(newServer: Server) {
+      setServer(newServer);
+    }
+    if (server_id === undefined)
+      return () => {};
+    else {
+      updateServer(data.servers[server_id] ?? null);
+      registerServerListener(server_id, updateServer);
+      return () => {
+        unregisterServerListener(server_id, updateServer);
+      }
+    }
+  }, [server_id, server])
+  return [server, server_id ? (srv: Server) => {
+    connection.send_cmd({
+      type: "UpdateServer",
+      body: {
+        id: srv.id,
+        name: srv.name,
+        communicator_type: srv.comm_type,
+        settings: srv.settings.reduce((acc: {[id: string]: any}, setting) => {
+          acc[`${setting.type}/${setting.name}`] = setting.value;
+          return acc;
+        }, {}),
+      }
+    })
+  } : () => {}];
 }
 
 export const useServerComms = (server_id: string | undefined): [Message[], (cmd: string) => void] => {

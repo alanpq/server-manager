@@ -24,6 +24,7 @@ pub use {
 use crate::state::State;
 use tokio::sync::RwLock;
 use futures::channel::mpsc::UnboundedSender;
+use serde_json::Value;
 
 #[derive(Debug)]
 #[derive(Serialize)]
@@ -50,7 +51,12 @@ pub enum ClientCommand {
   ServerLog{id: Uuid, page_no: Option<usize>}, // get page of server log (if no page specified, return last page)
 
   CreateServer,
-  UpdateServer{id: Uuid, name: Option<String>, communicator_type: Option<CommunicatorType>},
+  UpdateServer {
+    id: Uuid,
+    name: Option<String>,
+    communicator_type: Option<CommunicatorType>,
+    settings: Option<Value>,
+  },
   RemoveServer(Uuid),
   ListServers,
 }
@@ -67,8 +73,9 @@ pub async fn process_command(cmd: ClientCommand, client_id: &Uuid, state: &RwLoc
     ClientCommand::UpdateServer {
       id,
       name,
-      communicator_type
-    } => update_server(state, client_id, &id, &name, &communicator_type).await,
+      communicator_type,
+      settings
+    } => update_server(state, client_id, &id, &name, &communicator_type, &settings).await,
     ClientCommand::RemoveServer(id) => remove_server(state, client_id, &id).await,
     ClientCommand::ListServers => list_servers(state, client_id).await,
   }

@@ -16,7 +16,6 @@ pub async fn status(state: &RwLock<State>, client_id: &Uuid, id: &Option<Uuid>) 
     let server = server.unwrap();
 
     let mut info = server.info();
-    info.settings = server.get_settings();
     info.clients = serde_json::to_value(&state.clients).unwrap();
 
     Some(vec!(Message::from(encode_cmd(

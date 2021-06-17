@@ -163,7 +163,8 @@ impl Server {
     if let Some(comm) = self.communicator.as_ref() {
       info.comm_type = comm.comm_type();
     }
-    return info;
+    info.settings = self.get_settings();
+    info
   }
 
   pub fn get_settings(&self) -> Value {
@@ -177,11 +178,17 @@ impl Server {
     }
   }
 
+  pub fn set_settings(&mut self, settings: &Value) {
+    if let Some(communicator) = &mut self.communicator {
+      communicator.update_settings(settings.clone()).unwrap();
+    }
+  }
+
   fn name(&self) -> &String {
     return &self.info.name;
   }
 
-  fn set_name(&mut self, name: String) {
-    self.info.name = name;
+  pub fn set_info(&mut self, info: &ServerInfo) {
+    self.info = info.clone();
   }
 }

@@ -11,7 +11,7 @@ export function ServerView() {
   const [server, setServer] = useState<Server>();
 
   useEffect(() => {
-    fetchServer(id, setServer);
+    fetchServer(id);
     return () => {
     }
   }, [id]);

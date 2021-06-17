@@ -5,13 +5,14 @@ import {ServerDetails} from "./ServerDetails";
 import {ServerConsole} from "./ServerConsole";
 
 import './Dashboard.scss';
-import {fetchServer, useServerComms} from "../websocket/connection_service";
+import {fetchServer, useServer, useServerComms} from "../websocket/connection_service";
 
 export function Dashboard(props: {
   onOpen: (server: Server) => void,
   servers: { [p: string]: Server },
 }) {
-  const [server, setServer]: [Server | null, any] = useState(null);
+  const [id, setId] = useState<string>();
+  const [server, setServer] = useServer(id);
 
   // @ts-ignore
   const [lines, sendCmd] = useServerComms(server?.id);
@@ -24,14 +25,18 @@ export function Dashboard(props: {
     <ServerList
       onOpen={props.onOpen}
       onChange={(id) => {
-        setServer(props.servers[id]);
+        setId(id);
         console.log(id);
-        fetchServer(id, setServer);
+        fetchServer(id);
       }}
     />
-    <ServerDetails server={server}/>
+    <ServerDetails server={server} onEdit={(value) => {
+      Object.assign(server, value);
+      if (server !== null)
+        setServer(server);
+    }}/>
     <article className="mini-console">
-      <ServerConsole content={lines} onCommand={sendCmd}/>
+      {/*<ServerConsole content={lines} onCommand={sendCmd}/>*/}
     </article>
   </main>;
 }
