@@ -1,9 +1,9 @@
-$NAV_HEIGHT: 2.5em;
+$nav_height: 2.5em;
 
 #root {
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: $NAV_HEIGHT 1fr;
+  grid-template-rows: $nav_height 1fr;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -14,7 +14,7 @@ header nav {
   display: flex;
   flex-direction: row;
   margin: 0;
-  padding: 0 5px 0 $NAV_HEIGHT;
+  padding: 0 5px 0 $nav_height;
 
   height: 100%;
 

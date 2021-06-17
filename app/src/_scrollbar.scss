@@ -1,0 +1,8 @@
+@mixin minimal {
+  scrollbar-color: #87898b #1d1f21;
+  scrollbar-width: thin;
+
+  &::-webkit-scrollbar {
+    // TODO: webkit scrollbars
+  }
+}

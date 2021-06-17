@@ -1,3 +1,4 @@
+$padding: 1em;
 main.dashboard {
   box-sizing: border-box;
   background: #222629;
@@ -14,7 +15,7 @@ main.dashboard {
           "LIST CONSOLE";
 
   gap: 1.2em;
-  padding: 1em;
+  padding: $padding;
 }
 
 .mini-console {

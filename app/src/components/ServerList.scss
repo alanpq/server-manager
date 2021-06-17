@@ -1,6 +1,10 @@
+@use "../App";
+@use "Dashboard";
+@use "../scrollbar";
 $SERVER_HEIGHT: 54px;
 
 .server-list {
+  @include scrollbar.minimal;
   margin: 0;
   padding: 0;
 
@@ -9,10 +13,13 @@ $SERVER_HEIGHT: 54px;
   grid-template-columns: 2fr auto auto;
 
   height: fit-content;
+  max-height: calc(100vh - #{App.$nav_height + Dashboard.$padding});
   user-select: none;
 
   justify-content: center;
   align-items: center;
+
+  overflow-y: auto;
 
   li {
     display: grid;
