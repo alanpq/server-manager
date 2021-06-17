@@ -19,12 +19,10 @@ const listeners: {
 const connection = new Connection();
 const data: {
   communicator_types: string[],
-  serverList: Server[],
   servers: {[server_id: string]: Server},
   messages: {[server_id: string]: Message[]},
 } = {
   communicator_types: [],
-  serverList: [],
   servers: {},
   messages: {},
 };
@@ -150,7 +148,7 @@ export const useServerList = () => {
     function handleListChange(newList: Server[]) {
       setList(newList)
     }
-    setList(data.serverList);
+    setList(Object.values(data.servers));
     listeners.serverList.add(handleListChange);
     return () => {
       listeners.serverList.delete(handleListChange);
