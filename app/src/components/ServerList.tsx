@@ -1,5 +1,5 @@
 import {Server} from "../modals/server";
-import {useServerList} from "../websocket/connection_service";
+import {createServer, useServerList} from "../websocket/connection_service";
 import React, {useState} from "react";
 
 import './ServerList.scss';
@@ -76,5 +76,6 @@ export function ServerList(props: {
         </li>
       })
     }
+    <li className="new" onClick={() => {createServer()}}>+</li>
   </ul>;
 }

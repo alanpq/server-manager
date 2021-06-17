@@ -104,6 +104,12 @@ connection.on_cmd = (cmd: any) => {
   }
 }
 
+export const createServer = () => {
+  connection.send_cmd({
+    type: "CreateServer"
+  })
+}
+
 /**
  * Fetches new information on specified server.
  * @param server_id UUID of the server.

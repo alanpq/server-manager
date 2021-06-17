@@ -90,4 +90,15 @@ $SERVER_HEIGHT: 54px;
       transform: rotate(180deg);
     }
   }
+  .new {
+    height: 2em;
+    text-align: center;
+    grid-template-columns: 1fr;
+    cursor: pointer;
+
+    color: #EEEEEE7F;
+    &:hover {
+      color: #EEEEEE;
+    }
+  }
 }
