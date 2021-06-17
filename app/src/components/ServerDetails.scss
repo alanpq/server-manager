@@ -1,3 +1,29 @@
+@mixin minimal-input {
+  margin: 0;
+  padding: 0.1em 0.25em;
+
+  color: rgba(136, 138, 139, 0.5);
+  background: none;
+  outline: 0;
+  border: 0;
+
+  transition: background-color 0.1s ease-in-out,
+  color 0.1s ease-in-out;
+
+  cursor: pointer;
+  &:hover {
+    background: rgba(0,0,0,0.2);
+  }
+
+  &:focus {
+    color: #888A8B;
+    background: rgba(0,0,0,0.3);
+    &::placeholder {
+      opacity: 0;
+    }
+  }
+}
+
 .server-details {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -15,9 +41,19 @@
     padding-bottom: .5em;
     border-bottom: 1px solid #2b2f34;
 
-    h1 {
+    input {
+      @include minimal-input;
       margin: 0 .5em 0 0;
-      padding: 0;
+      //padding: 0;
+
+      width: min-content;
+
+      font-size: 1.25em;
+
+      background: none;
+      outline: none;
+      border: none;
+      color: #EEEEEE;
     }
 
     button {
@@ -46,29 +82,7 @@
     grid-area: LEFT;
 
     input, select {
-      margin: 0;
-      padding: 0.1em 0.25em;
-
-      color: rgba(136, 138, 139, 0.5);
-      background: none;
-      outline: 0;
-      border: 0;
-
-      transition: background-color 0.1s ease-in-out,
-                  color 0.1s ease-in-out;
-
-      cursor: pointer;
-      &:hover {
-        background: rgba(0,0,0,0.2);
-      }
-
-      &:focus {
-        color: #888A8B;
-        background: rgba(0,0,0,0.3);
-        &::placeholder {
-          opacity: 0;
-        }
-      }
+      @include minimal-input;
 
       &::placeholder {
         font-style: italic;

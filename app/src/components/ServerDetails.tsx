@@ -15,7 +15,7 @@ export function ServerDetails(props: {
   } else {
     return <article className="server-details">
       <header>
-        <h1>{props.server.name}</h1>
+        <input value={props.server.name}/>
         <button>EDIT</button>
         <button>SHUTDOWN</button>
         <button>OPEN</button>
