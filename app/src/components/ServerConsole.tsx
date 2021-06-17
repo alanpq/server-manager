@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect, useRef} from "react";
 
 import './ServerConsole.scss'
 import {Message} from "../modals/message";
@@ -45,9 +45,14 @@ export function ServerConsole(props: {
   content: Message[],
   onCommand: (cmd: string) => void,
 }) {
+  const contentEl = useRef(null);
+  useEffect(() => {
+    // @ts-ignore
+    contentEl?.current.scrollTo(0, contentEl?.current.scrollHeight);
+  }, [props.content]);
 
   return <section className="console">
-    <div>
+    <div ref={contentEl}>
       <ul>
         {
           props.content.map((message, idx) => {
