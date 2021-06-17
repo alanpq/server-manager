@@ -31,9 +31,10 @@ export function Dashboard(props: {
       }}
     />
     <ServerDetails server={server} onEdit={(value) => {
-      Object.assign(server, value);
-      if (server !== null)
+      if (server !== null) {
+        Object.assign(server, value);
         setServer(server);
+      }
     }}/>
     <article className="mini-console">
       {/*<ServerConsole content={lines} onCommand={sendCmd}/>*/}
