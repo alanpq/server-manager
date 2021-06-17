@@ -32,14 +32,14 @@ impl Communicator for CSGORcon {
     return "Not connected to server.".to_string()
   }
 
-  fn comm_type(&self) -> CommunicatorType {
-    CommunicatorType::CSGO
-  }
-
   async fn connect(&mut self, address: &str, password: &str) -> Result<(), rcon::Error> {
     let conn = Connection::builder().connect(address, password).await?;
     self.conn = Some(conn);
     Ok(())
+  }
+
+  fn comm_type(&self) -> CommunicatorType {
+    CommunicatorType::CSGO
   }
 
   fn settings(&self) -> Value {

@@ -13,11 +13,9 @@ pub async fn create_server(state: &RwLock<State>, client_id: &Uuid) -> Option<Ve
 
     // arghhhh no code reuse >:((((
     let state = state.read().await;
-    let mut tx = Vec::new();
-    tx.push(Message::from(encode_cmd(
+    Some(vec!(Message::from(encode_cmd(
         &ServerCommand::ServerList(state.servers.values().map(|srv| {
             srv.info()
         }).collect())
-    )));
-    Some(tx)
+    ))))
 }

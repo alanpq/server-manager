@@ -94,12 +94,12 @@ impl Server {
     self.info.comm_type = *comm_type;
   }
 
-  pub fn set_name(&mut self, name: &String) {
-    self.info.name = name.clone();
+  pub fn set_name(&mut self, name: &str) {
+    self.info.name = name.to_string();
   }
 
   pub fn id(&self) -> &Uuid {
-    return &self.id;
+    &self.id
   } 
 
   pub async fn send_cmd(&mut self, user: &Uuid, cmd: String) -> String {
@@ -171,13 +171,5 @@ impl Server {
     if let Some(communicator) = &mut self.communicator {
       communicator.update_settings(settings.clone()).unwrap();
     }
-  }
-
-  fn name(&self) -> &String {
-    return &self.info.name;
-  }
-
-  pub fn set_info(&mut self, info: &ServerInfo) {
-    self.info = info.clone();
   }
 }
