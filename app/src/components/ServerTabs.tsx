@@ -4,7 +4,6 @@ import React, {useEffect} from "react";
 import {Link, useHistory} from "react-router-dom";
 
 import './ServerTabs.scss';
-import user from '../svg/user.svg';
 import {UserIcon} from "../svg/UserIcon";
 
 const TabLink = React.forwardRef<HTMLButtonElement, {}>((props, ref) => (
