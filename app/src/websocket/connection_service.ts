@@ -52,7 +52,7 @@ connection.on_cmd = (cmd: any) => {
         id: cmd.body.id,
         name: cmd.body.name,
         communicator: cmd.body.communicator,
-        settings: Object.entries(cmd.body.settings).map(([key, value]: [string, any]) => {
+        settings: Object.entries(cmd.body.settings ?? {}).map(([key, value]: [string, any]) => {
           const spl = key.split('/');
           return {
             type: spl[0],
