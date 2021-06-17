@@ -246,7 +246,7 @@ async fn main() -> io::Result<()> {
 
     let state = Arc::new(RwLock::new(State::new()));
 
-    let mut server = Server::new("ein csgo server".to_string(), Some(Box::new(CSGORcon::new())));
+    let mut server = Server::new("ein csgo server".to_string());
     server.connect("ein:27015", "bruh").await.ok();
 
     state.write().await.servers.insert(*server.id(), server);

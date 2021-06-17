@@ -4,6 +4,7 @@ use serde_json::Value;
 use uuid::Uuid;
 use chrono::{Utc};
 use std::cmp;
+use crate::communicators::generate_communicator;
 
 #[derive(Debug)]
 #[derive(Serialize, Deserialize)]
@@ -60,7 +61,7 @@ impl Message {
 
 pub const PAGE_SIZE: usize = 50; // server page size, in messages
 
-type BoxedCommunicator = Box<dyn Communicator + Send + Sync>;
+pub type BoxedCommunicator = Box<dyn Communicator + Send + Sync>;
 
 pub struct Server {
   id: Uuid,
@@ -70,43 +71,27 @@ pub struct Server {
 }
 
 impl Server {
-  pub fn new(name: String, communicator: Option<BoxedCommunicator>) -> Server {
+  pub fn new(name: String) -> Server {
     let id = Uuid::new_v4();
     Server {
       id,
       info: ServerInfo {
         id, 
         name,
-        communicator: CommunicatorStatus::DISCONNECTED,
+        communicator: CommunicatorStatus::MISSING,
         comm_type: CommunicatorType::None,
         settings: Value::Null,
         clients: Value::Null,
       },
-      communicator,
+      communicator: None,
       messages: Vec::new(),
     }
   }
-  // TODO: better server creation infra
-  // im 90% sure theres a way to delegate the creation code to the communicators themselves
-  // that way the footprint of a new communicator is ideally only in 1 file
-  pub fn create(name: String, communicator: Option<CommunicatorType>) -> Server {
-    match communicator {
-      Some(communicator) => {
-        match communicator {
-          CommunicatorType::None => {
-            Server::new(name, None)
-          },
-          CommunicatorType::CSGO => {
-            Server::new(name, Some(Box::new(CSGORcon::new())))
-          },
-        }
-      },
-      None => {
-        let mut s = Server::new(name, None);
-        s.info.communicator = CommunicatorStatus::MISSING;
-        s
-      }
-    }
+
+  pub fn set_communicator(&mut self, comm_type: CommunicatorType) {
+    self.communicator = generate_communicator(comm_type);
+    self.info.communicator = CommunicatorStatus::DISCONNECTED;
+    self.info.comm_type = comm_type;
   }
 
   pub fn id(&self) -> &Uuid {
