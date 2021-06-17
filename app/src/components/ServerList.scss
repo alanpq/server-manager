@@ -13,7 +13,7 @@ $SERVER_HEIGHT: 54px;
   grid-template-columns: 2fr auto auto;
 
   height: fit-content;
-  max-height: calc(100vh - #{App.$nav_height + Dashboard.$padding});
+  max-height: calc(100vh - #{App.$nav_height + Dashboard.$padding*2});
   user-select: none;
 
   justify-content: center;
