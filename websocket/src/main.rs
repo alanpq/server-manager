@@ -246,11 +246,6 @@ async fn main() -> io::Result<()> {
 
     let state = Arc::new(RwLock::new(State::new()));
 
-    let mut server = Server::new("ein csgo server".to_string());
-    server.connect("ein:27015", "bruh").await.ok();
-
-    state.write().await.servers.insert(*server.id(), server);
-
     info!("loading certificate...");
     let certs = load_certs(&PathBuf::from("../ssl/server.cert"))?;
     info!("{} certs loaded.", certs.len());
