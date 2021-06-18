@@ -12,7 +12,7 @@ export function Dashboard(props: {
   servers: { [p: string]: Server },
 }) {
   const [id, setId] = useState<string>();
-  const [server, setServer] = useServer(id);
+  const [server, editServer] = useServer(id);
 
   // @ts-ignore
   const [lines, sendCmd] = useServerComms(server?.id);
@@ -32,8 +32,7 @@ export function Dashboard(props: {
     />
     <ServerDetails server={server} onEdit={(value) => {
       if (server !== null) {
-        Object.assign(server, value);
-        setServer(server);
+        editServer({id: server.id, ...value});
       }
     }}/>
     <article className="mini-console">

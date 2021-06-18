@@ -10,6 +10,8 @@ use crate::communicators::CommunicatorType;
 pub struct CSGORcon {
   #[serde(skip)]
   conn: Option<Connection>,
+  #[serde(rename = "text/address")]
+  address: String,
   #[serde(rename = "password/password")]
   password: String,
 }
@@ -18,6 +20,7 @@ impl CSGORcon {
   pub fn new() -> CSGORcon {
     CSGORcon {
       conn: None,
+      address: String::new(),
       password: String::new(),
     }
   }
@@ -32,8 +35,8 @@ impl Communicator for CSGORcon {
     return "Not connected to server.".to_string()
   }
 
-  async fn connect(&mut self, address: &str, password: &str) -> Result<(), rcon::Error> {
-    let conn = Connection::builder().connect(address, password).await?;
+  async fn connect(&mut self) -> Result<(), rcon::Error> {
+    let conn = Connection::builder().connect(&self.address, &self.password).await?;
     self.conn = Some(conn);
     Ok(())
   }
@@ -56,12 +59,21 @@ impl Communicator for CSGORcon {
   }
 
   fn update_settings(&mut self, new: Value) -> Result<(), Box<dyn std::error::Error>> {
+    debug!("{} / {}", self.address, self.password);
     if let Some(obj) = new.as_object() {
-      if let Some(pwd) = obj.get("password") {
-        self.password = pwd.to_string();
+      if let Some(v) = obj.get("text/address") {
+        if v.is_string() {
+          debug!("{}", v.as_str().unwrap());
+          debug!("{}", v.as_str().unwrap().to_string());
+          self.address = String::from(v.as_str().unwrap());
+        }
+      }
+      if let Some(v) = obj.get("password/password") {
+        if v.is_string() {
+          self.password = String::from(v.as_str().unwrap_or_default());
+        }
       }
     }
-
     Ok(())
   }
 }

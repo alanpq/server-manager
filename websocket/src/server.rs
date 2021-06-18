@@ -118,11 +118,11 @@ impl Server {
     }
   }
   
-  pub async fn connect(&mut self, address: &str, password: &str) -> Result<(), communicator::Error> {
+  pub async fn connect(&mut self) -> Result<(), communicator::Error> {
     match self.communicator.as_mut() {
       Some(communicator) => {
         self.info.communicator = CommunicatorStatus::CONNECTING;
-        let res = communicator.connect(address, password).await;
+        let res = communicator.connect().await;
         if res.is_err() {
           self.info.communicator = CommunicatorStatus::DISCONNECTED;
           return Err(communicator::Error::ConnectionError);
@@ -167,7 +167,7 @@ impl Server {
     }
   }
 
-  pub fn set_settings(&mut self, settings: &Value) {
+  pub fn update_settings(&mut self, settings: &Value) {
     if let Some(communicator) = &mut self.communicator {
       communicator.update_settings(settings.clone()).unwrap();
     }

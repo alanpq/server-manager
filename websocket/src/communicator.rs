@@ -33,7 +33,7 @@ impl From<rcon::Error> for Error {
 #[async_trait]
 pub trait Communicator {
   async fn send_cmd(&mut self, cmd: String) -> String;
-  async fn connect(&mut self, address: &str, password: &str) -> Result<(), rcon::Error>;
+  async fn connect(&mut self) -> Result<(), rcon::Error>;
 
   fn comm_type(&self) -> CommunicatorType;
   fn settings(&self) -> Value;

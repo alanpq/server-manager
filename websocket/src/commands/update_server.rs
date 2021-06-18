@@ -25,7 +25,7 @@ pub async fn update_server(
                 server.set_communicator(comm_type);
             }
             if let Some(settings) = settings {
-                server.set_settings(settings);
+                server.update_settings(settings);
             }
             return Some(vec!(Message::from(encode_cmd(
                 &ServerCommand::Status(server.info())

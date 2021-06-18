@@ -197,10 +197,7 @@ export const useServer = (server_id: string | undefined): [Server | null, (srv: 
         id: srv.id,
         name: srv.name,
         communicator_type: srv.comm_type,
-        settings: srv.settings.reduce((acc: {[id: string]: any}, setting) => {
-          acc[`${setting.type}/${setting.name}`] = setting.value;
-          return acc;
-        }, {}),
+        settings: srv.settings,
       }
     })
   } : () => {}];

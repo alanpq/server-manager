@@ -9,17 +9,23 @@ export function ServerDetails(props: {
   onEdit: (value: any) => void,
 }) {
 
-  const [data, setData] = useState<{[name: string]: any}>({
-    name: "",
-    communicator_type: "None",
-  });
+  const [name, setName] = useState<string>("");
+  const [comm, setComm] = useState<string>("");
+  const [data, setData] = useState<{[name: string]: any}>({});
 
   useEffect(() => {
     if(props.server !== null) {
-      setData({
-        name: props.server.name,
-        comm_type: props.server.comm_type,
-      });
+      setName(props.server.name)
+      setComm(props.server.comm_type)
+      // @ts-ignore
+      console.log(props.server.settings);
+      setData(props.server.settings.reduce((acc: {[name: string]: any}, val) => {
+        if(val.type !== "password")
+          acc[val.name] = val.value;
+        else
+          acc[val.name] = data[val.name]
+        return acc;
+      }, {}));
     }
   }, [props.server]);
 
@@ -28,9 +34,8 @@ export function ServerDetails(props: {
   const _handleInput = (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     data[event.target.name] = event.target.value;
     setData(data);
-    const obj: any = {};
-    obj[event.target.name] = event.target.value;
-    props.onEdit(obj);
+    console.log(event.target.value);
+    props.onEdit({settings: {[event.target.type + '/' + event.target.name]: event.target.value}});
   };
 
   if (props.server === null) {
@@ -40,7 +45,10 @@ export function ServerDetails(props: {
     return <article className="server-details">
       <header>
         {/*FIXME: debounce all of these inputs*/}
-        <input name="name" value={data.name} onChange={_handleInput}/>
+        <input name="name" value={name} onChange={e=>{
+          setName(e.target.value);
+          props.onEdit({name: e.target.value});
+        }}/>
         <button>EDIT</button>
         <button>SHUTDOWN</button>
         <button>OPEN</button>
@@ -51,7 +59,10 @@ export function ServerDetails(props: {
         <ul>
           <li>
             <span>Communicator Type</span>
-            <select name="comm_type" value={data.comm_type} onChange={_handleInput}>
+            <select name="comm_type" value={comm} onChange={e=>{
+              setComm(e.target.value);
+              props.onEdit({comm_type: e.target.value});
+            }}>
               {
                 // TODO: custom <select> dropdown
                 commTypes.map((v, idx) => {
@@ -69,9 +80,9 @@ export function ServerDetails(props: {
               <input
                 type={v.type}
                 name={v.name}
-                value={data[v.name]}
+                value={data[v.name] ?? ""}
                 placeholder={
-                  !v.value ? (v.type === "password" ? "hidden" : "empty") : ""
+                  v.type === "password" ? "hidden" : "empty"
                 }
                 onChange={_handleInput}
               />
