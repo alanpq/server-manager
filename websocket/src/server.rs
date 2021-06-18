@@ -129,7 +129,7 @@ impl Server {
         let res = communicator.connect().await;
         if res.is_err() {
           self.info.communicator = CommunicatorStatus::DISCONNECTED;
-          return Err(communicator::Error::ConnectionError);
+          return Err(communicator::Error::ConnectionError(res.unwrap_err().to_string()));
         } else {
           self.info.communicator = CommunicatorStatus::CONNECTED;
         }
@@ -140,6 +140,25 @@ impl Server {
         Ok(())
       }
     } 
+  }
+
+  pub async fn disconnect(&mut self) -> Result<(), communicator::Error> {
+    match self.communicator.as_mut() {
+      Some(communicator) => {
+        let res = communicator.disconnect().await;
+        if res.is_err() {
+          self.info.communicator = CommunicatorStatus::CONNECTED;
+          return Err(communicator::Error::ConnectionError(res.unwrap_err().to_string()));
+        } else {
+          self.info.communicator = CommunicatorStatus::DISCONNECTED;
+          return Ok(());
+        }
+      },
+      None => {
+        self.info.communicator = CommunicatorStatus::MISSING;
+        Ok(())
+      }
+    }
   }
 
   pub fn get_page(&self, page_no: usize) -> Vec<Message> {

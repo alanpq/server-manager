@@ -36,7 +36,7 @@ export function Dashboard(props: {
       }
     }}/>
     <article className="mini-console">
-      {/*<ServerConsole content={lines} onCommand={sendCmd}/>*/}
+      <ServerConsole content={lines} onCommand={sendCmd}/>
     </article>
   </main>;
 }

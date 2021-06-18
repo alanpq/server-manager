@@ -5,13 +5,13 @@ use crate::communicators::CommunicatorType;
 
 #[derive(Debug)]
 pub enum Error {
-  ConnectionError
+  ConnectionError(String)
 }
 
 impl std::error::Error for Error {
   fn description(&self) -> &str {
     match *self {
-        Error::ConnectionError => "Failed to connect to gameserver",
+        Error::ConnectionError(_) => "Failed to connect to gameserver",
     }
 }
 }
@@ -19,14 +19,14 @@ impl std::error::Error for Error {
 impl fmt::Display for Error {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     match self {
-      Error::ConnectionError => write!(f, "Communicator Connection Error"),
+      Error::ConnectionError(description) => write!(f, "Communicator Connection Error: {}", description),
     }
   }
 }
 
 impl From<rcon::Error> for Error {
-  fn from(_cause: rcon::Error) -> Error {
-    Error::ConnectionError
+  fn from(cause: rcon::Error) -> Error {
+    Error::ConnectionError(cause.to_string())
   }
 }
 
@@ -34,6 +34,7 @@ impl From<rcon::Error> for Error {
 pub trait Communicator {
   async fn send_cmd(&mut self, cmd: String) -> String;
   async fn connect(&mut self) -> Result<(), rcon::Error>;
+  async fn disconnect(&mut self) -> Result<(), Error>;
 
   fn comm_type(&self) -> CommunicatorType;
   fn settings(&self) -> Value;

@@ -5,6 +5,7 @@ use serde::Serialize;
 use serde_json::{Value, json};
 use log::*;
 use crate::communicators::CommunicatorType;
+use crate::communicator;
 
 #[derive(Serialize)]
 pub struct CSGORcon {
@@ -36,8 +37,14 @@ impl Communicator for CSGORcon {
   }
 
   async fn connect(&mut self) -> Result<(), rcon::Error> {
+    debug!("{}:{}", self.address, self.password);
     let conn = Connection::builder().connect(&self.address, &self.password).await?;
     self.conn = Some(conn);
+    Ok(())
+  }
+
+  async fn disconnect(&mut self) -> Result<(), communicator::Error> {
+    self.conn = None;
     Ok(())
   }
 
