@@ -10,6 +10,7 @@ mod server_log;
 mod set_server;
 mod status;
 mod update_server;
+mod connect_server;
 
 pub use {
   command::command,
@@ -20,6 +21,7 @@ pub use {
   set_server::set_server,
   status::status,
   update_server::update_server,
+  connect_server::connect_server,
 };
 use crate::state::State;
 use tokio::sync::RwLock;
@@ -58,6 +60,7 @@ pub enum ClientCommand {
     settings: Option<Value>,
   },
   RemoveServer(Uuid),
+  Connect(Uuid),
   ListServers,
 }
 
@@ -77,6 +80,7 @@ pub async fn process_command(cmd: ClientCommand, client_id: &Uuid, state: &RwLoc
       settings
     } => update_server(state, client_id, &id, &name, &communicator_type, &settings).await,
     ClientCommand::RemoveServer(id) => remove_server(state, client_id, &id).await,
+    ClientCommand::Connect(id) => connect_server(state, client_id, &id).await,
     ClientCommand::ListServers => list_servers(state, client_id).await,
   }
 }

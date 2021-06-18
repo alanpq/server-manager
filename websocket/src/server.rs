@@ -117,6 +117,10 @@ impl Server {
       }
     }
   }
+
+  pub fn push_msg(&mut self, msg: &Message) {
+    self.messages.push(msg.clone());
+  }
   
   pub async fn connect(&mut self) -> Result<(), communicator::Error> {
     match self.communicator.as_mut() {

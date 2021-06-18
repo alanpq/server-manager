@@ -2,7 +2,7 @@ import {Server} from "../modals/server";
 import React, {ChangeEvent, useEffect, useState} from "react";
 
 import './ServerDetails.scss'
-import {useCommTypes} from "../websocket/connection_service";
+import {connectServer, useCommTypes} from "../websocket/connection_service";
 
 export function ServerDetails(props: {
   server: Server | null,
@@ -50,7 +50,9 @@ export function ServerDetails(props: {
           props.onEdit({name: e.target.value});
         }}/>
         <button>EDIT</button>
-        <button>SHUTDOWN</button>
+        <button onClick={() => {
+          connectServer(props.server?.id);
+        }}>{(props.server.communicator === "CONNECTED") ? "DISCONNECT" : "CONNECT"}</button>
         <button>OPEN</button>
         <span className="flex grow"/>
         <button>DELETE</button>

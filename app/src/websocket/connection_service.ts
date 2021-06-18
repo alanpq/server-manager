@@ -138,6 +138,14 @@ export const fetchServer = (server_id: string | undefined) => {
   });
 }
 
+export const connectServer = (server_id: string | undefined) => {
+  if (server_id === undefined) return;
+  connection.send_cmd({
+    type: "Connect",
+    body: server_id,
+  })
+}
+
 export const useServerList = () => {
   const [list, setList]: [Server[], any] = useState([]);
 
