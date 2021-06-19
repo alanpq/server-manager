@@ -146,12 +146,12 @@ impl Server {
     match self.communicator.as_mut() {
       Some(communicator) => {
         let res = communicator.disconnect().await;
-        if res.is_err() {
+        return if res.is_err() {
           self.info.communicator = CommunicatorStatus::CONNECTED;
-          return Err(communicator::Error::ConnectionError(res.unwrap_err().to_string()));
+          Err(communicator::Error::ConnectionError(res.unwrap_err().to_string()))
         } else {
           self.info.communicator = CommunicatorStatus::DISCONNECTED;
-          return Ok(());
+          Ok(())
         }
       },
       None => {

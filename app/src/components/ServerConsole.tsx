@@ -1,7 +1,7 @@
 import React, {useEffect, useRef} from "react";
 
 import './ServerConsole.scss'
-import {Message} from "../modals/message";
+import {Message, MessageType} from "../modals/message";
 
 const formatTimestamp = (timestamp: Date) => {
   return `${("0"+timestamp.getHours()).slice(-2)}:${("0"+timestamp.getMinutes()).slice(-2)}:${("0"+timestamp.getSeconds()).slice(-2)}`
@@ -31,10 +31,10 @@ function Line(props: {
   msg: Message
 }) {
   const color = `#${getColor(props.msg.user)}22`;
-  return <li>
+  return <li className={props.msg.msg_type == MessageType.IN ? 'in' : 'out'}>
     <span style={{
       backgroundColor: color,
-    }} className={`timestamp ${props.msg.msg_type}`}>{formatTimestamp(new Date(props.msg.timestamp))}</span>
+    }} className="timestamp">{formatTimestamp(new Date(props.msg.timestamp))}</span>
     <span style={{
       backgroundColor: color,
     }} className="body" title={props.msg.user ?? ""}>{props.msg.body}</span>

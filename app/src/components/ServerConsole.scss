@@ -43,15 +43,23 @@
       background-color: transparent;
       //transition: background-color 0.075s ease-in-out;
 
+
+      &.in .body {
+        color: rgba(238, 238, 238, 0.64);
+        font-style: italic;
+      }
+
       .timestamp, .body {
         padding: .25em 0;
       }
       .timestamp {
         padding-left: .25em;
         padding-right: .5em;
+        color: rgba(238, 238, 238, 0.64);
       }
       .body {
         white-space: pre;
+        color: #EEEEEE;
       }
 
       //&:first-child * {

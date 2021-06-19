@@ -96,7 +96,14 @@ connection.on_cmd = (cmd: any) => {
       data.communicator_types = cmd.body.communicator_types;
       break;
     case "ServerLog":
-      data.messages[cmd.body.server_id] = cmd.body.messages; // TODO: handle different pages
+      data.messages[cmd.body.server_id] = cmd.body.messages.map((val: any) => {
+        return {
+          user: val.user,
+          body: val.body,
+          msg_type: val.msg_type == "IN" ? MessageType.IN : MessageType.OUT,
+          timestamp: val.timestamp,
+        }
+      }); // TODO: handle different pages
       broadcastListeners(listeners.serverComm[cmd.body.server_id], data.messages[cmd.body.server_id]);
       break;
     case "ServerList":
