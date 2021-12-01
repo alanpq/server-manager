@@ -1,7 +1,9 @@
 pub mod csgo;
+mod minecraft;
 use serde::{Serialize, Deserialize};
 use crate::communicator::Communicator;
 use crate::communicators::csgo::CSGORcon;
+use crate::communicators::minecraft::MCRcon;
 use crate::server::BoxedCommunicator;
 
 /* TODO: find a better alternative to hardcoding CommunicatorType
@@ -18,6 +20,8 @@ pub enum CommunicatorType {
   None,
   #[strum(serialize="CSGO")]
   CSGO,
+  #[strum(serialize="MC")]
+  MC,
 }
 
 pub fn generate_communicator(comm_type: &CommunicatorType) -> Option<BoxedCommunicator> {
@@ -28,5 +32,8 @@ pub fn generate_communicator(comm_type: &CommunicatorType) -> Option<BoxedCommun
     CommunicatorType::CSGO => {
      Some(Box::new(CSGORcon::new()))
     },
+    CommunicatorType::MC => {
+      Some(Box::new(MCRcon::new()))
+    }
   }
 }
