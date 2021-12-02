@@ -81,6 +81,11 @@
   .settings {
     grid-area: LEFT;
 
+    .dirty {
+      font-weight: bolder;
+      text-transform: uppercase;
+    }
+
     input, select {
       @include minimal-input;
 

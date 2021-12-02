@@ -12,6 +12,7 @@ export function ServerDetails(props: {
   const [name, setName] = useState<string>("");
   const [comm, setComm] = useState<string>("");
   const [data, setData] = useState<{[name: string]: any}>({});
+  const [dirty, setDirty] = useState<{[name: string]: boolean}>({});
 
   useEffect(() => {
     if(props.server !== null) {
@@ -31,11 +32,10 @@ export function ServerDetails(props: {
 
   const commTypes = useCommTypes();
 
-  const _handleInput = (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    data[event.target.name] = event.target.value;
-    setData(data);
-    console.log(event.target.value);
-    props.onEdit({settings: {[event.target.type + '/' + event.target.name]: event.target.value}});
+  const _sendSetting = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    props.onEdit({settings: {[event.currentTarget.type + '/' + event.currentTarget.name]: event.currentTarget.value}});
+    dirty[event.currentTarget.name] = false;
+    setDirty(dirty);
   };
 
   if (props.server === null) {
@@ -47,8 +47,7 @@ export function ServerDetails(props: {
         {/*FIXME: debounce all of these inputs*/}
         <input name="name" value={name} onChange={e=>{
           setName(e.target.value);
-          props.onEdit({name: e.target.value});
-        }}/>
+        }} onKeyDown={e=>{if (e.key==="Enter") props.onEdit({name: e.currentTarget.value});}}/>
         <button>EDIT</button>
         <button onClick={() => {
           if (props.server?.communicator === "CONNECTED") {
@@ -82,7 +81,7 @@ export function ServerDetails(props: {
           {props.server.settings &&
           props.server.settings.map((v, idx) => {
             return <li key={idx}>
-              <span>{v.name}</span>
+              <span className={dirty[v.name] ? "dirty" : ""}>{v.name}</span>
               <input
                 type={v.type}
                 name={v.name}
@@ -90,7 +89,15 @@ export function ServerDetails(props: {
                 placeholder={
                   v.type === "password" ? "hidden" : "empty"
                 }
-                onChange={_handleInput}
+                onChange={e=>{
+                  const c:any = {};
+                  Object.assign(c, data);
+                  c[e.target.name] = e.target.value;
+                  setData(c);
+                  dirty[e.target.name] = true;
+                  setDirty(dirty);
+                }}
+                onKeyDown={e=>{if (e.key==="Enter") _sendSetting(e);}}
               />
             </li>;
           })
