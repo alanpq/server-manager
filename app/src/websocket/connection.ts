@@ -7,9 +7,9 @@ const process_binary = (buffer: ArrayBuffer) => {
   // TODO: this can definitely be optimised
   let str = "";
   for(let i = 0; i < view.length; i++) {
-    str += String.fromCharCode(view[i]); // surely like some string builder js alternative
+    str += String.fromCodePoint(view[i]); // surely like some string builder js alternative
   }
-  return atob(str);
+  return decodeURIComponent(atob(str));
 }
 
 export default class Connection {

@@ -79,7 +79,7 @@ async fn accept_connection(peer: SocketAddr, stream: TlsStream<TcpStream>, state
 }
 
 fn encode_cmd(cmd: &ServerCommand) -> Vec<u8> {
-    Vec::from(encode(serde_json::to_string(cmd).unwrap()).as_bytes())
+    Vec::from(encode(urlencoding::encode(&serde_json::to_string(cmd).unwrap()).as_bytes()))
 }
 
 lazy_static! {
