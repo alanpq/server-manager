@@ -23,6 +23,38 @@ const intToRGB = (i: number) => {
   return "00000".substring(0, 6 - c.length) + c;
 }
 
+const colorMap = ["black", "dark_blue", "dark_green", "dark_aqua", "dark_red", "dark_purple", "gold", "gray", "dark_gray", "blue", "green", "aqua", "red", "light_purple", "yellow", "white", "", "", "", "", "obfuscate", "bold", "strike", "underline", "italic"];
+
+const colorToClass = (color: string) => {
+  const v = color.charCodeAt(0);
+  if (v >= 48 && v <= 57) {
+    return colorMap[v-48];
+  } else if (v >= 97 && v <= 102) {
+    return colorMap[v-97];
+  }
+  return "";
+}
+
+const parseColors = (msg: string) => {
+  let chunks = msg.split("§");
+  let final = [];
+  let class_buf = [];
+  for(let i = 0; i < chunks.length; i++) {
+    const c = chunks[i];
+    if (i == 0 && msg[0] !== "§") {
+      final.push(c);
+      continue;
+    }
+    class_buf.push(colorToClass(c));
+    if (c.length > 1) {
+      final.push(`<span class="${class_buf.join(' ')}">${c.slice(1)}</span>`)
+      class_buf = [];
+    }
+  }
+  console.log(chunks);
+  return final.join("");
+}
+
 const getColor = (user: string) => {
   return intToRGB(hashCode(user));
 }
@@ -37,7 +69,7 @@ function Line(props: {
     }} className="timestamp">{formatTimestamp(new Date(props.msg.timestamp))}</span>
     <span style={{
       backgroundColor: color,
-    }} className="body" title={props.msg.user ?? ""}>{props.msg.body}</span>
+    }} className="body" title={props.msg.user ?? ""} dangerouslySetInnerHTML={{__html: parseColors(props.msg.body)}}></span>
   </li>
 }
 
