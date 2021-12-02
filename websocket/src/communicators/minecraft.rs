@@ -38,7 +38,7 @@ impl Communicator for MCRcon {
 
     async fn connect(&mut self) -> Result<(), rcon::Error> {
         debug!("{}:{}", self.address, self.password);
-        let conn = Connection::builder().connect(&self.address, &self.password).await?;
+        let conn = Connection::builder().enable_minecraft_quirks(true).connect(&self.address, &self.password).await?;
         self.conn = Some(conn);
         Ok(())
     }
