@@ -58,6 +58,10 @@ const getColor = (user: string) => {
   return intToRGB(hashCode(user));
 }
 
+const parseLines = (contents: string) => {
+  return `<span>${contents.split("\n").map(parseColors).join('</span><span>')}</span>`
+}
+
 function Line(props: {
   msg: Message
 }) {
@@ -68,7 +72,7 @@ function Line(props: {
     }} className="timestamp">{formatTimestamp(new Date(props.msg.timestamp))}</span>
     <span style={{
   backgroundColor: color,
-}} className="body" title={props.msg.user ?? ""} dangerouslySetInnerHTML={{__html: parseColors(props.msg.body)}}/>
+}} className="body" title={props.msg.user ?? ""} dangerouslySetInnerHTML={{__html: parseLines(props.msg.body)}}/>
   </li>
 }
 
