@@ -87,7 +87,7 @@ lazy_static! {
 }
 
 async fn handle_connection(peer: SocketAddr, stream: TlsStream<TcpStream>, state: Arc<RwLock<State>>) -> Result<()> {
-    let mut ws_stream = accept_async(stream).await.expect("Failed to accept");
+    let ws_stream = accept_async(stream).await.expect("Failed to accept");
 
     info!("New WebSocket connection: {}", peer);
 

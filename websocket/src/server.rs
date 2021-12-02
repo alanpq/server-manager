@@ -146,7 +146,7 @@ impl Server {
     match self.communicator.as_mut() {
       Some(communicator) => {
         let res = communicator.disconnect().await;
-        return if res.is_err() {
+        if res.is_err() {
           self.info.communicator = CommunicatorStatus::CONNECTED;
           Err(communicator::Error::ConnectionError(res.unwrap_err().to_string()))
         } else {

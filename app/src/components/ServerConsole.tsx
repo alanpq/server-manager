@@ -8,15 +8,15 @@ const formatTimestamp = (timestamp: Date) => {
 }
 
 const hashCode = (str: string) => { // java String#hashCode
-  var hash = 0;
-  for (var i = 0; i < str.length; i++) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
     hash = str.charCodeAt(i) + ((hash << 5) - hash);
   }
   return hash;
 }
 
 const intToRGB = (i: number) => {
-  var c = (i & 0x00FFFFFF)
+  const c = (i & 0x00FFFFFF)
     .toString(16)
     .toUpperCase();
 
@@ -68,8 +68,8 @@ function Line(props: {
       backgroundColor: color,
     }} className="timestamp">{formatTimestamp(new Date(props.msg.timestamp))}</span>
     <span style={{
-      backgroundColor: color,
-    }} className="body" title={props.msg.user ?? ""} dangerouslySetInnerHTML={{__html: parseColors(props.msg.body)}}></span>
+  backgroundColor: color,
+}} className="body" title={props.msg.user ?? ""} dangerouslySetInnerHTML={{__html: parseColors(props.msg.body)}}/>
   </li>
 }
 

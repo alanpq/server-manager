@@ -129,7 +129,6 @@ export const createServer = () => {
 /**
  * Fetches new information on specified server.
  * @param server_id UUID of the server.
- * @param cb Callback for when server fetch completes.
  */
 export const fetchServer = (server_id: string | undefined) => {
   if (server_id === undefined) return;
