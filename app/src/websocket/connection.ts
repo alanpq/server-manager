@@ -56,7 +56,7 @@ export default class Connection {
       return;
     }
     console.log('sending cmd: ', cmd);
-    this.socket.send(Uint8Array.from(btoa(JSON.stringify(cmd)), c=>c.charCodeAt(0)).buffer);
+    this.socket.send(Uint8Array.from(btoa(encodeURIComponent(JSON.stringify(cmd))), c=>c.charCodeAt(0)).buffer);
   }
 
   send(data: string | ArrayBufferLike | Blob | ArrayBufferView) {

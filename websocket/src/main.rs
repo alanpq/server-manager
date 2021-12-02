@@ -170,7 +170,8 @@ async fn handle_connection(peer: SocketAddr, stream: TlsStream<TcpStream>, state
                 let json = str::from_utf8(&bin).unwrap();
                 let json = decode(json).unwrap();
                 let json_str = str::from_utf8(&json).unwrap();
-                let json = serde_json::from_str::<ClientCommand>(json_str);
+                let json_str = urlencoding::decode(json_str).unwrap();
+                let json = serde_json::from_str::<ClientCommand>(&json_str);
 
                 match json {
                     Ok(cmd) => {
@@ -188,7 +189,7 @@ async fn handle_connection(peer: SocketAddr, stream: TlsStream<TcpStream>, state
                         // ))).unwrap();
                         warn!("Could not resolve ClientCommand:");
                         warn!("{:?}", err);
-                        match serde_json::from_str::<Value>(json_str) {
+                        match serde_json::from_str::<Value>(&json_str) {
                             Ok(val) => {
                                 warn!("Raw serde_json::Value -> '{:?}'", val);
                             },
