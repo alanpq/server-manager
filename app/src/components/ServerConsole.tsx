@@ -51,7 +51,6 @@ const parseColors = (msg: string) => {
       class_buf = [];
     }
   }
-  console.log(chunks);
   return final.join("");
 }
 
