@@ -135,7 +135,7 @@
       li {
         display: grid;
         grid-column: 1/3;
-        grid-template-columns: subgrid;
+        grid-template-columns: subgrid; // FIXME: stop using subgrid
 
         align-items: center;
       }

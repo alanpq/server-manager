@@ -35,7 +35,7 @@
 
     li {
       display: grid;
-      grid-template-columns: subgrid;
+      grid-template-columns: subgrid; // FIXME: stop using subgrid
 
       grid-column: 1/3;
 

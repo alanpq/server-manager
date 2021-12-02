@@ -24,7 +24,7 @@ $SERVER_HEIGHT: 54px;
   li {
     display: grid;
     grid-column: 1/4;
-    grid-template-columns: subgrid;
+    grid-template-columns: subgrid; // FIXME: stop using subgrid
 
     align-items: center;
 
